@@ -18,9 +18,11 @@ def choice_unit():
     return db.session.query(Unit)
     
 def matrixenc(self, item):
-    print('matix ENC')
-    item_matrix = str.join('-', (item.unit.unit, item.materialclass.materialclass, item.doctype.doctype))
     
+    print('matix ENC')
+    
+    item_matrix = str.join('-', (item.unit.unit, item.materialclass.materialclass, item.doctype.doctype, item.partner.partner))
+    item_serial = str.join('-', (item.unit.unit, item.materialclass.materialclass, item.doctype.doctype))    
     m = self.datamodel.query_model_relation('matrix')
     #item.matrix = Matrix(matrix=item_matrix)
     print('numero di matrix nella lista:',len(m))
@@ -37,16 +39,33 @@ def matrixenc(self, item):
             print('id di matrix', id_matrix)
             self.datamodel.edit(i)
             item.matrix_id = id_matrix
-            item.serial = item_matrix + "-" + str(i.counter).zfill(5)
+            item.serial = item_serial + "-" + str(i.counter).zfill(5)
             self.datamodel.edit(item)
+            message = 'Your code is ' + item.serial
+            flash(message, category='info')
             print(found)
             found = True
             print(found)
     if found == False:
         print('notFound !!!! !!!! !!!')
-        item.matrix = Matrix(counter=1, matrix=item_matrix)
-        item.serial = item_matrix + '1'
-        self.datamodel.add(item)
+        if str(item.unit) == '000':
+            print('found unit 000')
+            jv = {
+                    'TTSJV': 50000,
+                    'TPIT': 60000
+                }
+            print('counter', jv['TTSJV'], item.partner, jv[str(item.partner)])
+            item.matrix = Matrix(counter=jv[str(item.partner)] + 1, matrix=item_matrix)
+            print('------------')
+            item.serial = item_serial + "-" + str(jv[str(item.partner)] + 1).zfill(5)
+            print('-----2------')
+            self.datamodel.add(item)
+            
+        else:
+            item.matrix = Matrix(counter=1, matrix=item_matrix)
+            item.serial = item_serial + "-" + "1".zfill(5)
+            self.datamodel.add(item)
+            
 
 
     
