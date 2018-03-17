@@ -18,7 +18,10 @@ def mydefault():
 class Unit(Model):
     __tablename__ = "unit"
     id = Column(Integer, primary_key=True)
-    unit = Column(String(3))
+    unit = Column(String(3), unique=True, nullable=False)
+    name = Column(String(35), nullable=False)
+    start = Column(Integer, default=0)
+    stop = Column(Integer)
     description = Column(String(100))
 
     def __repr__(self):
@@ -28,6 +31,7 @@ class Materialclass(Model):
     __tablename__ = "materialclass"
     id = Column(Integer, primary_key=True)
     materialclass = Column(String(1))
+    name = Column(String(35), nullable=False)
     description = Column(String(100))
 
     def __repr__(self):
@@ -37,6 +41,7 @@ class Doctype(Model):
     __tablename__ = "doctype"
     id = Column(Integer, primary_key=True)
     doctype = Column(String(3))
+    name = Column(String(35), nullable=False)
     description = Column(String(100))
     
     def __repr__(self):
@@ -46,6 +51,7 @@ class Partner(Model):
     __tablename__ = "partner"
     id = Column(Integer, primary_key=True)
     partner = Column(String(20))
+    name = Column(String(35), nullable=False)
     description = Column(String(100))
     
     def __repr__(self):
