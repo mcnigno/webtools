@@ -1,7 +1,8 @@
 from flask_appbuilder import Model
-from flask_appbuilder.models.mixins import AuditMixin, FileColumn, ImageColumn
+from flask_appbuilder.models.mixins import AuditMixin
 from sqlalchemy import Column, Integer, String, ForeignKey  
 from sqlalchemy.orm import relationship
+from time import gmtime, strftime
 
 """
 
@@ -62,16 +63,16 @@ class Matrix(Model):
     __tablename__ = "matrix"
     id = Column(Integer, primary_key=True)
     matrix = Column(String(20))
-    counter = Column(Integer)
-    #encodings_id = Column(Integer, ForeignKey("encodings.id"), nullable=False)
-    #encodings = relationship('Encodings')
+    counter = Column(Integer, default=1)
+    document_id = Column(Integer, ForeignKey("document.id"))
+    document = relationship('Document')
     
     def __repr__(self):
         return self.matrix
 
 
-class Encodings(Model):
-    __tablename__ = "encodings"
+class DocRequests(AuditMixin, Model):
+    __tablename__ = "docrequests"
     id = Column(Integer, primary_key=True)
     unit_id = Column(Integer, ForeignKey('unit.id'), nullable=False)
     unit = relationship('Unit')
@@ -82,17 +83,29 @@ class Encodings(Model):
     partner_id = Column(Integer, ForeignKey('partner.id'), nullable=False)
     partner = relationship('Partner')
     matrix_id = Column(Integer, ForeignKey('matrix.id'))
-    #matrix_id = Column(String(20), ForeignKey('matrix.matrix'), nullable=False)
     matrix = relationship('Matrix')
-    matrix_r = Column(String(35))
-    serial = Column(String(35))
+    quantity = Column(Integer, default = 1)
     sheet = Column(String(3))
-    #sheet = Column(Integer, default=mydefault, onupdate=mydefault)
 
     def __repr__(self):
-        name = self.unit + self.materialclass + self.doctype + self.serial
+        name = str(self.unit) + str(self.materialclass) + str(self.doctype)
         return name
     
     def __init__(self):
         print('this is the UNIT code:', self.unit)
         self.serial = mydefault()
+    
+    
+        
+
+
+class Document(AuditMixin, Model):
+    __tablename__ = "document"
+    id = Column(Integer, primary_key=True)
+    code = Column(String(35))
+    oldcode = Column(String(35))
+    docrequests_id = Column(Integer, ForeignKey('docrequests.id'))
+    docrequests = relationship(DocRequests)
+    
+    def __repr__(self):
+        return self.code

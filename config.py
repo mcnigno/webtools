@@ -17,9 +17,9 @@ CSRF_ENABLED = True
 # GLOBALS FOR APP Builder 
 #------------------------------
 # Uncomment to setup Your App name
-#APP_NAME = "My App Name"
+APP_NAME = "Quasar Web Tools"
 
-# Uncomment to setup Setup an App icon
+# Uncomment to setup Setup an App icon 
 #APP_ICON = "static/img/logo.jpg"
 
 #----------------------------------------------------
@@ -88,7 +88,7 @@ IMG_UPLOAD_URL = '/static/uploads/'
 # Theme configuration
 # these are located on static/appbuilder/css/themes
 # you can create your own and easily use them placing them on the same dir structure to override
-APP_THEME = "bootstrap-theme.css"  # default bootstrap
+#APP_THEME = "bootstrap-theme.css"  # default bootstrap
 #APP_THEME = "cerulean.css"
 #APP_THEME = "amelia.css"
 #APP_THEME = "cosmo.css"
@@ -97,7 +97,7 @@ APP_THEME = "bootstrap-theme.css"  # default bootstrap
 #APP_THEME = "journal.css"
 #APP_THEME = "readable.css"
 #APP_THEME = "simplex.css"
-#APP_THEME = "slate.css"   
+APP_THEME = "slate.css"   
 #APP_THEME = "spacelab.css"
 #APP_THEME = "united.css"
 #APP_THEME = "yeti.css"

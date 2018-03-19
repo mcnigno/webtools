@@ -1,0 +1,11 @@
+{% extends 'appbuilder/baselayout.html' %}
+
+{% block head_css %}
+    {{ super() }}
+    <link rel="stylesheet" href="{{url_for('static',filename='css/mycss.css')}}"></link>
+{% endblock %}
+
+{% block head_js %}
+    {{ super() }}
+    <script src="{{url_for('static',filename='js/moment.js')}}"></script>
+{% endblock %}
