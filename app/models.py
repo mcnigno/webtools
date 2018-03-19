@@ -3,6 +3,7 @@ from flask_appbuilder.models.mixins import AuditMixin
 from sqlalchemy import Column, Integer, String, ForeignKey  
 from sqlalchemy.orm import relationship
 from time import gmtime, strftime
+from flask import Markup
 
 """
 
@@ -80,12 +81,13 @@ class DocRequests(AuditMixin, Model):
     materialclass = relationship('Materialclass')
     doctype_id = Column(Integer, ForeignKey('doctype.id'), nullable=False)
     doctype = relationship('Doctype')
+    sheet = Column(String(3), default='001')
     partner_id = Column(Integer, ForeignKey('partner.id'), nullable=False)
     partner = relationship('Partner')
     matrix_id = Column(Integer, ForeignKey('matrix.id'))
     matrix = relationship('Matrix')
-    quantity = Column(Integer, default = 1)
-    sheet = Column(String(3))
+    quantity = Column(Integer, default=1)
+    
 
     def __repr__(self):
         name = str(self.unit) + str(self.materialclass) + str(self.doctype)
@@ -96,16 +98,21 @@ class DocRequests(AuditMixin, Model):
         self.serial = mydefault()
     
     
-        
-
-
+    
+    
 class Document(AuditMixin, Model):
     __tablename__ = "document"
     id = Column(Integer, primary_key=True)
     code = Column(String(35))
-    oldcode = Column(String(35))
+    oldcode = Column(String(35), default='empty')
     docrequests_id = Column(Integer, ForeignKey('docrequests.id'))
     docrequests = relationship(DocRequests)
     
     def __repr__(self):
-        return self.code
+        name = 'some Document name'
+        return name
+    
+    def status(self):
+        if self.oldcode != 'empty':
+            return 'reserved'
+        return 'pending'

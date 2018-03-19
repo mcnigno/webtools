@@ -17,7 +17,7 @@ CSRF_ENABLED = True
 # GLOBALS FOR APP Builder 
 #------------------------------
 # Uncomment to setup Your App name
-APP_NAME = "Quasar Web Tools"
+APP_NAME = "Quasar PM | Bapco Web tools"
 
 # Uncomment to setup Setup an App icon 
 #APP_ICON = "static/img/logo.jpg"
