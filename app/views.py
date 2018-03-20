@@ -1,7 +1,7 @@
 from flask import render_template, flash
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder import (ModelView, CompactCRUDMixin, MasterDetailView,
-                              MultipleView, GroupByChartView)
+                              MultipleView, GroupByChartView, IndexView)
 from app import appbuilder, db
 from .models import (DocRequests, Unit, Materialclass, Doctype,
                      Partner, Matrix, Document)
