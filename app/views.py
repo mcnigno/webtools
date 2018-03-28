@@ -4,7 +4,8 @@ from flask_appbuilder import (ModelView, CompactCRUDMixin, MasterDetailView,
                               MultipleView, GroupByChartView, IndexView)
 from app import appbuilder, db
 from .models import (DocRequests, Unit, Materialclass, Doctype,
-                     Partner, Matrix, Document)
+                     Partner, Matrix, Document, Cdrlitem, Documentclass,
+                     Vendor, Mr)
 from flask_appbuilder.fieldwidgets import Select2AJAXWidget
 from flask_appbuilder.fields import AJAXSelectField
 from flask_appbuilder.models.group import aggregate_count
@@ -13,7 +14,7 @@ from flask_appbuilder.models.sqla.filters import (FilterStartsWith,
                                                   FilterEqualFunction,
                                                   FilterInFunction,
                                                   FilterEqual,
-                                                  FilterNotStartsWith
+                                                  FilterNotStartsWith, FilterEqual
                                                   )
 from flask import g
 
@@ -49,18 +50,20 @@ def adddoc2(self, item):
         item_matrix = str.join('-', (item.unit.unit,
                                      item.materialclass.materialclass,
                                      item.doctype.doctype,
-                                     item.sheet,
+                                     # item.sheet,
                                      item.partner.partner))
     else:
         item_matrix = str.join('-', (item.unit.unit,
                                      item.materialclass.materialclass,
                                      item.doctype.doctype,
-                                     item.sheet))
+                                     # item.sheet,
+                                     ))
 
     item_serial = str.join('-', (item.unit.unit,
                                  item.materialclass.materialclass,
                                  item.doctype.doctype,
-                                 item.sheet))
+                                 # item.sheet,
+                                 ))
 
     print('controllo item_ matrix', item_matrix)
     found = False
@@ -77,7 +80,7 @@ def adddoc2(self, item):
             datamodel.edit(row)
 
             item.matrix_id = row.id
-            code = item_serial + "-" + str(row.counter).zfill(5)
+            code = item_serial + "-" + str(row.counter).zfill(5) + "-" + item.sheet
 
             datamodel = SQLAInterface(Document, session=session)
             doc = Document(docrequests_id=item.id, code=code)
@@ -86,7 +89,8 @@ def adddoc2(self, item):
             message = 'Your code is ' + code
             flash(message, category='info')
             found = True
-
+    
+    # Matrix Not Found
     if found is False:
         print('Matrix NOT FOUND')
 
@@ -112,7 +116,7 @@ def adddoc2(self, item):
 
             # Add New Doc with quantity jv + 1
             datamodel = SQLAInterface(Document, session=session)
-            code = item_serial + "-" + str(jv[str(item.partner)] + 1).zfill(5)
+            code = item_serial + "-" + str(jv[str(item.partner)] + 1).zfill(5) + "-" + item.sheet
             doc = Document(docrequests_id=item.id, code=code)
 
             datamodel.add(doc)
@@ -130,7 +134,7 @@ def adddoc2(self, item):
 
             # Add New Doc with quantity 1
             datamodel = SQLAInterface(Document, session=session)
-            code = item_serial + "-" + "1".zfill(5)
+            code = item_serial + "-" + "1".zfill(5) + "-" + item.sheet
             doc = Document(docrequests_id=item.id, code=code)
 
             datamodel.add(doc)
@@ -146,15 +150,24 @@ def get_pending():
 
 class PendingView(ModelView):
     datamodel = SQLAInterface(Document)
+    
     #base_filters = [['oldcode', FilterStartsWith, '']]
     base_filters = [['oldcode', FilterStartsWith, 'empty'],
                     ['created_by', FilterEqualFunction, get_user]]
     
     list_columns = ['id', 'created_by', 'status', 'oldcode', 'code']
+    
     base_order = ('id', 'desc')
     list_title = 'Elenco Codifiche Bapco in stato "Pending"'
     edit_title = 'Modifica Codifica'
+    #label_columns = ['ID', 'Created by', 'Status']
     edit_columns = ['oldcode']
+    label_columns = {
+        'id': 'ID',
+        'status': 'Status',
+        'oldcode': 'Contractor Code',
+        'code': 'Bapco Code',
+    }
     
 
 
@@ -173,55 +186,150 @@ class DocumentView(CompactCRUDMixin, ModelView):
 
 
 
-
-
-class DocRequestsView(CompactCRUDMixin):
+# Vendor Form Request
+class VendorRequestsView(CompactCRUDMixin):
     datamodel = SQLAInterface(DocRequests)
+    label_columns = {
+        'id': 'ID',
+        'unit': 'Unit',
+        'materialclass': ' Mat Class',
+        'doctype': 'Doc Type',
+        'cdrlitem': 'CDRL Item',
+        'documentclass': 'Doc Class',
+        'partner': 'Partner',
+        'quantity': 'Doc Qty',
+    }
+
     base_order = ('id', 'desc')
     base_filters = [['created_by', FilterEqualFunction, get_user]]
+    #validators_columns = {'vendor': [FilterStartsWith('ND', message='Vendor field')]}
 
-    list_title = 'Richiesta Codifiche Bapco'
-    add_title = 'Nuova Richiesta Codifiche'
-    edit_title = 'Modifica Richiesta Codifica'
-    show_title = 'Vista Richiesta Codifica'
+    list_title = 'Vendor Code Request'
+    add_title = 'Add Vendor Code'
+    edit_title = 'Edit Vendor Code'
+    show_title = 'Show Vendor Code'
     related_views = [DocumentView, PendingView]
     # list_widget = ListThumbnail
     title = "Bapco Document ID Generator"
     search_columns = ['created_by']
+    
+    list_columns = ['id', 'unit', 'materialclass', 'doctype', 'cdrlitem',
+                    'documentclass', 'partner', 'quantity', 'vendor', 'mr', 'created_by',
+                    'created_on']
+    
+    edit_columns = ['unit', 'materialclass', 'doctype', 'cdrlitem',
+                    'documentclass', 'partner', 'vendor', 'mr', ]
 
-    list_columns = ['id', 'unit', 'materialclass', 'doctype',
-                    'partner', 'quantity', 'created_by', 'created_on']
-
-    edit_columns = ['unit', 'materialclass', 'doctype', 'partner']
-
-    search_columns = ['unit', 'materialclass', 'doctype', 'partner',
-                      'quantity']
+    search_columns = ['unit', 'materialclass', 'doctype', 'cdrlitem',
+                      'documentclass', 'partner', 'quantity', 'vendor', 'mr', ]
 
     add_exclude_columns = ['id', 'matrix']
 
     add_fieldsets = [
                         (
-                            'Numero di Codifiche richiesto',
+                            'Number of Codes',
                             {'fields': ['quantity']}
                         ),
                         (
-                            'Bapco Document Setting',
+                            'Bapco Code Setting',
                             {'fields': ['unit',
                                         'materialclass',
                                         'doctype',
+                                        'cdrlitem',
+                                        'documentclass',
+                                        'vendor',
+                                        'mr',
+                                        'partner'], 'expanded':False}
+                        ),
+                     ]
+    show_fieldsets = [
+                        (
+                            'Number of Bapco Codes',
+                            {'fields': ['quantity']}
+                        ),
+                        (
+                            'Bapco Code',
+                            {'fields': ['unit',
+                                        'materialclass',
+                                        'doctype',
+                                        'cdrlitem',
+                                        'documentclass',
+                                        'partner'], 'expanded':True}
+                        ),
+                     ]
+    
+    def post_add(self, item):
+
+        for i in range(0, item.quantity):
+            print('*****VVVVVV******')
+
+            adddoc2(self, item)
+
+# Engineering Form Request
+class DocRequestsView(ModelView):
+    datamodel = SQLAInterface(DocRequests)
+    label_columns = {
+        'id': 'ID',
+        'unit': 'Unit',
+        'materialclass': ' Mat Class',
+        'doctype': 'Doc Type',
+        'cdrlitem': 'CDRL Item',
+        'documentclass': 'Doc Class',
+        'partner': 'Partner',
+        'quantity': 'Doc Qty'
+
+    }
+    base_order = ('id', 'desc')
+    base_filters = [['created_by', FilterEqualFunction, get_user]]
+
+    list_title = 'Engineering Code Request'
+    add_title = 'Add Engineering Code'
+    edit_title = 'Edit Engineering Code'
+    show_title = 'Show Engineering Code'
+    related_views = [DocumentView, PendingView]
+    # list_widget = ListThumbnail
+    title = "Bapco Document ID Generator"
+    search_columns = ['created_by']
+    
+    list_columns = ['id', 'unit', 'materialclass', 'doctype', 'cdrlitem',
+                    'documentclass', 'partner', 'quantity', 'created_by',
+                    'created_on']
+    
+    edit_columns = ['unit', 'materialclass', 'doctype', 'cdrlitem',
+                    'documentclass', 'partner']
+
+    search_columns = ['unit', 'materialclass', 'doctype', 'cdrlitem',
+                      'documentclass', 'partner', 'quantity']
+
+    add_exclude_columns = ['id', 'matrix']
+
+    add_fieldsets = [
+                        (
+                            'Number of Bapco Codes',
+                            {'fields': ['quantity']}
+                        ),
+                        (
+                            'Bapco Code Setting',
+                            {'fields': ['unit',
+                                        'materialclass',
+                                        'doctype',
+                                        'cdrlitem',
+                                        'documentclass',
                                         'partner'], 'expanded':True}
                         ),
                      ]
     show_fieldsets = [
                         (
-                            'Number of Bapco IDs',
+                            'Number of Bapco Codes',
                             {'fields': ['quantity']}
                         ),
                         (
-                            'Bapco Document',
+                            'Bapco Code',
                             {'fields': ['unit',
                                         'materialclass',
                                         'doctype',
+                                        'cdrlitem',
+                                        'documentclass',
                                         'partner'], 'expanded':True}
                         ),
                      ]
@@ -270,6 +378,26 @@ class PartnerView(ModelView):
     # list_widget = ListThumbnail
 
 
+class CdrlitemView(ModelView):
+    datamodel = SQLAInterface(Cdrlitem)
+    list_columns = ['cdrlitem', 'description']
+
+
+class DocumentclassView(ModelView):
+    datamodel = SQLAInterface(Documentclass)
+    list_columns = ['documentclass', 'description']
+
+
+class VendorView(ModelView):
+    datamodel = SQLAInterface(Vendor)
+    list_columns = ['vendor', 'description']
+
+
+class MrView(ModelView):
+    datamodel = SQLAInterface(Mr)
+    list_columns = ['mr', 'description']
+
+
 class MatrixView(ModelView):
     datamodel = SQLAInterface(Matrix)
     list_columns = ['id', 'matrix', 'counter']
@@ -297,6 +425,8 @@ class EncodChartView(GroupByChartView):
             'series': [(aggregate_count, 'unit_id')]
         }
     ]
+
+
 class ListRequest(ModelView):
     datamodel = SQLAInterface(DocRequests)
     base_order = ('id', 'desc')
@@ -364,7 +494,14 @@ appbuilder.add_view(AskBapcoView, "Richiesta Codifica",
                     icon="fa-paper-plane", category="Ask Bapco",
                     category_icon='fa-bold')
 
-appbuilder.add_view_no_menu(DocRequestsView)
+#appbuilder.add_view_no_menu(DocRequestsView)
+appbuilder.add_view(DocRequestsView, "Engineering Code Request",
+                    icon="fa-paper-plane", category="Ask Bapco",
+                    category_icon='fa-bold')
+
+appbuilder.add_view(VendorRequestsView, "Vendor Code Request",
+                    icon="fa-paper-plane", category="Ask Bapco",
+                    category_icon='fa-bold')
 
 appbuilder.add_view(ListRequest, "Elenco Richieste",
                     icon="fa-codepen", category="Ask Bapco")
@@ -394,7 +531,18 @@ appbuilder.add_view(DoctypeView, "Lista DocType",
 appbuilder.add_view(PartnerView, "Lista Partner",
                     icon="fa-list", category="Bapco Settings",
                     category_icon='fa-cubes')
-
+appbuilder.add_view(CdrlitemView, "Lista CDRL Item",
+                    icon="fa-list", category="Bapco Settings",
+                    category_icon='fa-cubes')
+appbuilder.add_view(DocumentclassView, "Lista Document Class",
+                    icon="fa-list", category="Bapco Settings",
+                    category_icon='fa-cubes')
+appbuilder.add_view(VendorView, "Lista Vendor",
+                    icon="fa-list", category="Bapco Settings",
+                    category_icon='fa-cubes')
+appbuilder.add_view(MrView, "Lista MR",
+                    icon="fa-list", category="Bapco Settings",
+                    category_icon='fa-cubes')
 
 # Bapco Backend
 appbuilder.add_view(MatrixView, "Matrix View",

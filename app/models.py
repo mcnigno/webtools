@@ -60,6 +60,50 @@ class Partner(Model):
         return self.partner
 
 
+class Documentclass(Model):
+    __tablename__ = "documentclass"
+    id = Column(Integer, primary_key=True)
+    documentclass = Column(String(35), unique=True)
+    name = Column(String(35), nullable=False)
+    description = Column(String(100))
+
+    def __repr__(self):
+        return self.documentclass
+
+
+class Cdrlitem(Model):
+    __tablename__ = "cdrlitem"
+    id = Column(Integer, primary_key=True)
+    cdrlitem = Column(String(35), unique=True)
+    name = Column(String(35), nullable=False)
+    description = Column(String(100))
+
+    def __repr__(self):
+        return self.cdrlitem
+
+
+class Vendor(Model):
+    __tablename__ = "vendor"
+    id = Column(Integer, primary_key=True)
+    vendor = Column(String(35), unique=True)
+    name = Column(String(35), nullable=False)
+    description = Column(String(100))
+
+    def __repr__(self):
+        return self.vendor
+
+
+class Mr(Model):
+    __tablename__ = "mr"
+    id = Column(Integer, primary_key=True)
+    mr = Column(String(35), unique=True)
+    name = Column(String(35), nullable=False)
+    description = Column(String(100))
+
+    def __repr__(self):
+        return self.mr
+
+
 class Matrix(Model):
     __tablename__ = "matrix"
     id = Column(Integer, primary_key=True)
@@ -84,6 +128,14 @@ class DocRequests(AuditMixin, Model):
     sheet = Column(String(3), default='001')
     partner_id = Column(Integer, ForeignKey('partner.id'), nullable=False)
     partner = relationship('Partner')
+    cdrlitem_id = Column(Integer, ForeignKey('cdrlitem.id'))
+    cdrlitem = relationship('Cdrlitem')
+    documentclass_id = Column(Integer, ForeignKey('documentclass.id'))
+    documentclass = relationship('Documentclass')
+    vendor_id = Column(Integer, ForeignKey('vendor.id'))
+    vendor = relationship('Vendor')
+    mr_id = Column(Integer, ForeignKey('mr.id'))
+    mr = relationship('Mr')
     matrix_id = Column(Integer, ForeignKey('matrix.id'))
     matrix = relationship('Matrix')
     quantity = Column(Integer, default=1)
