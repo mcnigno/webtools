@@ -129,3 +129,5 @@ ENV/
 =======
 >>>>>>> 99fc724e2e58ebfa93ce2923111ad8999b03b84c
 app.db
+# mac os
+.DS_Store
