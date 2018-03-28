@@ -17,12 +17,13 @@ from flask_appbuilder.models.sqla.filters import (FilterStartsWith,
                                                   FilterNotStartsWith, FilterEqual
                                                   )
 from flask import g
+from flask_babel import gettext
 
 
 # from app import bapco2 as bapco
 # from wtforms import Form, StringField, SelectField
 # from wtforms_sqlalchemy.fields import QuerySelectField
-# from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, InputRequired
 # from flask_appbuilder.forms import DynamicForm, FlaskForm
 # from flask_appbuilder import SimpleFormView
 # from flask_babel import lazy_gettext as _
@@ -189,6 +190,7 @@ class DocumentView(CompactCRUDMixin, ModelView):
 # Vendor Form Request
 class VendorRequestsView(CompactCRUDMixin):
     datamodel = SQLAInterface(DocRequests)
+   # default_view = 'add'
     label_columns = {
         'id': 'ID',
         'unit': 'Unit',
@@ -202,8 +204,10 @@ class VendorRequestsView(CompactCRUDMixin):
 
     base_order = ('id', 'desc')
     base_filters = [['created_by', FilterEqualFunction, get_user]]
-    #validators_columns = {'vendor': [FilterStartsWith('ND', message='Vendor field')]}
-
+    validators_columns = {'vendor': [DataRequired(message='NOT Released: Vendor is required')],
+                          'mr': [DataRequired(message='NOT Released: MR is required')]
+    }
+    
     list_title = 'Vendor Code Request'
     add_title = 'Add Vendor Code'
     edit_title = 'Edit Vendor Code'
