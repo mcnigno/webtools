@@ -134,4 +134,4 @@ app.db
 
 #csv folder
 
-static/csv/
+app/static/csv/
