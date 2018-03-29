@@ -1,4 +1,4 @@
-from flask import render_template, flash
+from flask import render_template, flash, redirect, url_for
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_appbuilder import (ModelView, CompactCRUDMixin, MasterDetailView,
                               MultipleView, GroupByChartView, IndexView)
@@ -16,24 +16,40 @@ from flask_appbuilder.models.sqla.filters import (FilterStartsWith,
                                                   FilterEqual,
                                                   FilterNotStartsWith, FilterEqual
                                                   )
-from flask import g
+from flask import g, send_file
 from flask_babel import gettext
+from flask_appbuilder import BaseView, expose, has_access
 
-
-# from app import bapco2 as bapco
-# from wtforms import Form, StringField, SelectField
-# from wtforms_sqlalchemy.fields import QuerySelectField
 from wtforms.validators import DataRequired, InputRequired
-# from flask_appbuilder.forms import DynamicForm, FlaskForm
-# from flask_appbuilder import SimpleFormView
-# from flask_babel import lazy_gettext as _
-# from sqlalchemy.orm import relationship
+from .helpers import adddoc3, bapco, tocsv, toxlsx, codes_to_xlsx
+import csv
+from app import app
+from flask_appbuilder.actions import action
+from flask_appbuilder import filemanager
+
+
 
 def get_user():
     return g.user
 
-def choice_unit():
-    return db.session.query(Unit)
+class CsvView(BaseView):
+    
+    @has_access
+    @expose('/getcsv/<string:filename>')
+    def send_csv(filename):
+        print('SEND CSV')
+        return send_file(filename) 
+
+
+def choice_unit(self,item):
+    print('CHOICE UNIT')
+    
+    result = db.session.query(Unit).filter(Unit.unit == '000').first()
+    #result = db.session.query(q)
+    print('before printing result')
+    print(result.name)
+    print('lunghezza di result unit:')
+    return self, item
 
 
 def matrixenc(self, item):
@@ -41,7 +57,7 @@ def matrixenc(self, item):
     print('matix ENC')
     adddoc2(self, item)
 
-
+'''
 def adddoc2(self, item):
     print('adddoc 2 +++++')
     print('doctype, sheet', item.doctype.doctype, item.sheet)
@@ -145,24 +161,27 @@ def adddoc2(self, item):
     db.session.flush()
 
 
+
+
 def get_pending():
     return 'reserved'
+'''
 
 
 class PendingView(ModelView):
     datamodel = SQLAInterface(Document)
-    
-    #base_filters = [['oldcode', FilterStartsWith, '']]
-    base_filters = [['oldcode', FilterStartsWith, 'empty'],
-                    ['created_by', FilterEqualFunction, get_user]]
-    
-    list_columns = ['id', 'created_by', 'status', 'oldcode', 'code']
+    list_title = 'Pending Codes'
     
     base_order = ('id', 'desc')
-    list_title = 'Elenco Codifiche Bapco in stato "Pending"'
-    edit_title = 'Modifica Codifica'
-    #label_columns = ['ID', 'Created by', 'Status']
+    base_filters = [['oldcode', FilterStartsWith, 'empty'],
+                    ['created_by', FilterEqualFunction, get_user]]
+
+    edit_title = 'Edit Code'
+    show_title = 'Show Code'
+    
+    list_columns = ['id', 'created_by', 'status', 'oldcode', 'code']
     edit_columns = ['oldcode']
+    
     label_columns = {
         'id': 'ID',
         'status': 'Status',
@@ -174,23 +193,55 @@ class PendingView(ModelView):
 
 class DocumentView(CompactCRUDMixin, ModelView):
     datamodel = SQLAInterface(Document)
+    list_title = 'All Bapco Codes'
     
     base_order = ('id', 'desc')
     base_filters = [['created_by', FilterEqualFunction, get_user]]
-    list_title = 'Elenco Codifiche Bapco'
-    #add_title = 'Nuova Richiesta Codifiche'
-    edit_title = 'Modifica Codifica'
-    show_title = 'Vista Codifica'
+
+    edit_title = 'Edit Code'
+    show_title = 'Show Code'
 
     list_columns = ['id', 'created_by', 'status', 'oldcode', 'code']
     edit_columns = ['oldcode']
+    
+    label_columns = {
+        'id': 'ID',
+        'status': 'Status',
+        'oldcode': 'Contractor Code',
+        'code': 'Bapco Code',
+    }
+    @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
+    def muldelete(self, items):
+        if isinstance(items, list):
+            self.datamodel.delete_all(items)
+            self.update_redirect()
+        else:
+            self.datamodel.delete(items)
+        return redirect(self.get_redirect())
+    
+    @action("export", "Export", "Export all Really?", "fa-rocket")
+    def export(self, items):
+        if isinstance(items, list):
+            codes_list = []
+            for item in items:
+                print('item', item.code)
+                codes_list.append([item.code])
+            filename = codes_to_xlsx(codes_list)
+            send_file('static/csv/'+ filename, as_attachment=True)
+
+            self.update_redirect()
+        else:
+            self.datamodel.delete(items)
+        
+        print(codes_list)
+        return redirect(self.get_redirect())
 
 
 
 # Vendor Form Request
-class VendorRequestsView(CompactCRUDMixin):
+class VendorRequestsView(ModelView):
     datamodel = SQLAInterface(DocRequests)
-   # default_view = 'add'
+    default_view = 'list'
     label_columns = {
         'id': 'ID',
         'unit': 'Unit',
@@ -200,26 +251,30 @@ class VendorRequestsView(CompactCRUDMixin):
         'documentclass': 'Doc Class',
         'partner': 'Partner',
         'quantity': 'Doc Qty',
+        'request_type': 'Type'
     }
 
     base_order = ('id', 'desc')
-    base_filters = [['created_by', FilterEqualFunction, get_user]]
+    base_filters = [['created_by', FilterEqualFunction, get_user],
+                    ['request_type', FilterEqual, 'vendor']
+                    ]
+    
     validators_columns = {'vendor': [DataRequired(message='NOT Released: Vendor is required')],
                           'mr': [DataRequired(message='NOT Released: MR is required')]
     }
     
     list_title = 'Vendor Code Request'
-    add_title = 'Add Vendor Code'
-    edit_title = 'Edit Vendor Code'
-    show_title = 'Show Vendor Code'
+    add_title = 'Add Vendor Code Request'
+    edit_title = 'Edit Vendor Code Request'
+    show_title = 'Show Vendor Code Request'
     related_views = [DocumentView, PendingView]
     # list_widget = ListThumbnail
-    title = "Bapco Document ID Generator"
+    title = "Bapco Vendor Code Request"
     search_columns = ['created_by']
     
     list_columns = ['id', 'unit', 'materialclass', 'doctype', 'cdrlitem',
-                    'documentclass', 'partner', 'quantity', 'vendor', 'mr', 'created_by',
-                    'created_on']
+                    'documentclass', 'partner', 'quantity', 'vendor', 'mr', 
+                    'created_by', 'request_type', 'created_on', 'csv']
     
     edit_columns = ['unit', 'materialclass', 'doctype', 'cdrlitem',
                     'documentclass', 'partner', 'vendor', 'mr', ]
@@ -261,13 +316,22 @@ class VendorRequestsView(CompactCRUDMixin):
                                         'partner'], 'expanded':True}
                         ),
                      ]
+
     
     def post_add(self, item):
-
+        choice_unit(self, item)
+        session_list = []
         for i in range(0, item.quantity):
-            print('*****VVVVVV******')
+            print('****** Vendor Code Released ******')
 
-            adddoc2(self, item)
+            code = bapco(self, item)
+            session_list.append([code])
+            print(code)
+            print('SESSION LIST:', session_list)
+        toxlsx(self, item, session_list)
+        
+
+
 
 # Engineering Form Request
 class DocRequestsView(ModelView):
@@ -284,15 +348,17 @@ class DocRequestsView(ModelView):
 
     }
     base_order = ('id', 'desc')
-    base_filters = [['created_by', FilterEqualFunction, get_user]]
+    base_filters = [['created_by', FilterEqualFunction, get_user],
+                    ['request_type', FilterEqual, 'engineering']
+                    ]
 
     list_title = 'Engineering Code Request'
-    add_title = 'Add Engineering Code'
-    edit_title = 'Edit Engineering Code'
-    show_title = 'Show Engineering Code'
+    add_title = 'Add Engineering Code Request'
+    edit_title = 'Edit Engineering Code Request'
+    show_title = 'Show Engineering Code Request'
     related_views = [DocumentView, PendingView]
     # list_widget = ListThumbnail
-    title = "Bapco Document ID Generator"
+    title = "Bapco Engineering Code Request"
     search_columns = ['created_by']
     
     list_columns = ['id', 'unit', 'materialclass', 'doctype', 'cdrlitem',
@@ -346,11 +412,16 @@ class DocRequestsView(ModelView):
                                             }
 
     def post_add(self, item):
-
+        choice_unit(self, item)
+        session_list = []
         for i in range(0, item.quantity):
-            print('*****VVVVVV******')
+            print('****** Engineering Code Released ******')
 
-            adddoc2(self, item)
+            code = bapco(self, item)
+            session_list.append([code])
+            print(code)
+            print('SESSION LIST:', session_list)
+        toxlsx(self, item, session_list)
 
 
 class AskBapcoView(MultipleView):
@@ -361,7 +432,7 @@ class AskBapcoView(MultipleView):
 
 class UnitView(CompactCRUDMixin, ModelView):
     datamodel = SQLAInterface(Unit)
-    list_columns = ['unit', 'description']
+    list_columns = ['unit', 'unit_type', 'description']
     # list_widget = ListCarousel
     # label_columns = ['unit','description']
 
@@ -436,8 +507,8 @@ class ListRequest(ModelView):
     base_order = ('id', 'desc')
     base_filters = [['created_by', FilterEqualFunction, get_user]]
 
-    list_title = 'Richiesta Codifiche Bapco'
-    add_title = 'Nuova Richiesta Codifiche'
+    list_title = 'All Requests'
+    add_title = 'Add new Request'
     edit_title = 'Modifica Richiesta Codifica'
     show_title = 'Vista Richiesta Codifica'
     related_views = [DocumentView, PendingView]
@@ -446,7 +517,7 @@ class ListRequest(ModelView):
     search_columns = ['created_by']
 
     list_columns = ['id', 'unit', 'materialclass', 'doctype',
-                    'partner', 'quantity', 'created_by', 'created_on']
+                    'partner', 'quantity', 'created_by', 'created_on', 'request_type']
 
     edit_columns = ['unit', 'materialclass', 'doctype', 'partner']
 
