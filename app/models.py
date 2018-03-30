@@ -165,12 +165,12 @@ class Document(AuditMixin, Model):
     oldcode = Column(String(35), default='empty')
     docrequests_id = Column(Integer, ForeignKey('docrequests.id'))
     docrequests = relationship(DocRequests)
-    
+
     def __repr__(self):
         name = 'some Document name'
         return name
-    
+
     def status(self):
         if self.oldcode != 'empty':
-            return 'reserved'
-        return 'pending'
+            return Markup('<img border="0" src="/static/img/reserved.png" alt="W3Schools" width="16" height="16">'+' Reserved')
+        return Markup('<img border="0" src="/static/img/pending.png" alt="W3Schools" width="16" height="16">'+' Pending')
