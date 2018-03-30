@@ -264,7 +264,7 @@ def codes_to_xlsx(codes_list):
     print('CODEStoXLSX FUNCTION')
     print(codes_list)
     #filename = 'app/static/csv/bapco_request_'+ str(item.id) + '.xlsx'
-    filename =  str(uuid.uuid4()) + '.xlsx'
+    filename = 'Quasar|' + str(uuid.uuid4()) + '|bapco.xlsx'
     workbook = xlsxwriter.Workbook('app/static/csv/' + filename)
     workbook.set_properties({
                             'title':    'Bapco Request spreadsheet',

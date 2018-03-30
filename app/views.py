@@ -227,15 +227,17 @@ class DocumentView(CompactCRUDMixin, ModelView):
                 print('item', item.code)
                 codes_list.append([item.code])
             filename = codes_to_xlsx(codes_list)
-            send_file('static/csv/'+ filename, as_attachment=True)
+            
 
             self.update_redirect()
+            
         else:
-            self.datamodel.delete(items)
+            filename = codes_to_xlsx(items.code)
         
         print(codes_list)
-        return redirect(self.get_redirect())
-
+        redirect(self.get_redirect())
+        #self.update_redirect()
+        return send_file('static/csv/' + filename, as_attachment=True)
 
 
 # Vendor Form Request
