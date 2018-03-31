@@ -259,7 +259,8 @@ class VendorRequestsView(ModelView):
         'documentclass': 'Doc Class',
         'partner': 'Partner',
         'quantity': 'Doc Qty',
-        'request_type': 'Type'
+        'request_type': 'Type',
+        'csv': 'XLS'
     }
 
     base_order = ('id', 'desc')
@@ -352,7 +353,8 @@ class DocRequestsView(ModelView):
         'cdrlitem': 'CDRL Item',
         'documentclass': 'Doc Class',
         'partner': 'Partner',
-        'quantity': 'Doc Qty'
+        'quantity': 'Doc Qty',
+        'csv': 'XLS'
 
     }
     base_order = ('id', 'desc')
@@ -367,18 +369,18 @@ class DocRequestsView(ModelView):
     related_views = [DocumentView, PendingView]
     # list_widget = ListThumbnail
     title = "Bapco Engineering Code Request"
-    search_columns = ['created_by']
+    search_columns = ['created_by', 'created_on']
     
     list_columns = ['id', 'unit', 'materialclass', 'doctype', 'cdrlitem',
                     'documentclass', 'partner', 'quantity', 'created_by',
-                    'created_on']
+                    'created_on','created', 'csv']
     
     edit_columns = ['unit', 'materialclass', 'doctype', 'cdrlitem',
                     'documentclass', 'partner']
-
+    '''
     search_columns = ['unit', 'materialclass', 'doctype', 'cdrlitem',
-                      'documentclass', 'partner', 'quantity']
-
+                      'documentclass', 'partner', 'quantity', 'created_on']
+    '''
     add_exclude_columns = ['id', 'matrix']
 
     add_fieldsets = [
