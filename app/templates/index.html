@@ -1,10 +1,46 @@
 {% extends "appbuilder/base.html" %}
 {% block content %}
+<div class="jumbotron" style="background-color:darkgrey; color:darkred">
+  <div class="container" style="text-align:center;">
+
+    <h1 style="color:white">{{_("ASK ")}}<img border="0" src="/static/img/Bapco_logo350x138.png" alt="W3Schools" width="200"></h2>
+    <h4 style="color:black">{{_("DOCUMENT ENCODE ENGINE by Quasar ")}}</h3>
+    
+  </div>
+</div>
+
+<div class="row jumbotron" style="text-align:center;">
+  <div class="col-md-6 container" >
+      
+          <h2><img border="0" src="/static/img/engineering.png" alt="W3Schools" width="64" height="64"> {{_("ENGINEERING")}}</h2>
+          <h3>{{_("Generate yor engineering codes.")}}</h3>
+          <p>{{_("In this area you can also list, add, edit, delete and export bapco's codes. Functionalities and permissions are based on you role.  ")}}</p>
+          <a class="btn btn-primary" href="/docrequestsview/list/" role="button">Engineering Code</a>
+        
+      </div> 
+     
+  
+  <div class="col-md-6 container">
+      
+      
+
+          <h2><img border="0" src="/static/img/vendor.png" alt="W3Schools" width="64" height="64"> {{_("VENDOR")}}</h2>
+          <h3>{{_("Generate your vendor codes.")}}</h3>
+          <p>{{_("In this area you can also list, add, edit, delete and export bapco's codes. Functionalities and permissions are based on you role.  ")}}</p>
+          <a class="btn btn-primary" href="#" role="button">Vendor Code</a>
+      
+      </div>
+  
+</div>
+
+
 <div class="jumbotron">
   <div class="container">
-    <h1>{{_("ASK Bapco")}}</h1>
+    <p><img border="0" src="/static/img/excel.png" alt="W3Schools" width="64" height="64"></p>
+    <h1>{{_("ASK Bapco Update from Excel")}}</h1>
     <h2>{{_("Document Encoding Tool by QuasarPM.com")}}</h2>
-    <p>{{_("Generate unique code for ")}}</p>
+    <p>{{_("Generate unique code for Bapco")}}</p>
+    <a class="btn btn-primary" href="#" role="button">Udate</a>
   </div>
 </div>
 {% endblock %}

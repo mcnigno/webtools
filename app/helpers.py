@@ -7,6 +7,7 @@ from .models import Matrix, Document, Unit, Partner
 import csv, xlsxwriter
 from werkzeug.utils import secure_filename
 import uuid
+import openpyxl
 
 
 
@@ -264,7 +265,7 @@ def codes_to_xlsx(codes_list):
     print('CODEStoXLSX FUNCTION')
     print(codes_list)
     #filename = 'app/static/csv/bapco_request_'+ str(item.id) + '.xlsx'
-    filename =  str(uuid.uuid4()) + '.xlsx'
+    filename = 'Quasar|' + str(uuid.uuid4()) + '|bapco.xlsx'
     workbook = xlsxwriter.Workbook('app/static/csv/' + filename)
     workbook.set_properties({
                             'title':    'Bapco Request spreadsheet',
@@ -295,8 +296,35 @@ def codes_to_xlsx(codes_list):
         row += 1
     workbook.close()
     return filename
-    
-    
-                
 
+def update_from_xlsx(file):
+    session = db.session
+    print('update FUNCTION!')
+    book = openpyxl.load_workbook(file)
+    sheet = book.active
+    a1 = sheet['A1']
+    print(a1.value)
+    reserved_list = []
+    updated_list = []
+    for row in sheet.iter_rows(min_row=2):
+        bapco_code = row[0].value
+        oldcode = row[1].value
+        print(bapco_code, oldcode)
+        doc = db.session.query(Document).filter(Document.code == str(bapco_code)).first()
+
+        if doc and doc.oldcode == 'empty':
+            print('this is the ID' ,doc.id)
+            datamodel = SQLAInterface(Document, session=session)
+            print('BEFORE oldcode', doc.oldcode)
+            doc.oldcode = oldcode
+            updated_list.append([doc.id, doc.code, doc.oldcode])
+            datamodel.edit(doc)
+
+        else:
+            reserved_list.append([doc.id, doc.code, doc.oldcode])
+    return reserved_list, updated_list
+
+   
+
+            
 

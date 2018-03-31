@@ -1,0 +1,55 @@
+{% extends "appbuilder/base.html" %}
+
+{% block content %}
+
+<div class="jumbotron" text-align="center">
+	
+
+
+<form method="POST" enctype="multipart/form-data" action="/uploadcodes/excel/" >
+	
+  
+  <h2> Select XLSX files to upload.</h2>
+  <p></p>
+  <p></p>
+
+  <input type="file" class="btn btn-primary" name="file[]" multiple=""><br>
+  <p>Select one or more ExcelFile.xlsx files and press the add buttom.</p><br>
+  <p></p><br>
+  <input type="submit" class="btn btn-success" value="add">
+</form>
+
+
+</div>
+
+<div class="jumbotron" text-align="center">
+    <h2> List of XLSX files uploaded.</h2>
+    <h3> This files have been processed.</h3>
+    <p></p><br>
+    {% for i in filename %}
+    <p><img border="0" src="/static/img/excel.png" alt="W3Schools" width="24" height="24">  {{i}}</p>
+		
+		
+	{% endfor %}
+		
+</div>
+<div class="jumbotron">
+    <h2>{{count_updated}} Codes Updated.</h2>
+    <h3> This codes have been updated.</h3>
+    <p></p>
+    {% for i in updated_list %}
+    <p><img border="0" src="/static/img/document-tick-icon.png" alt="W3Schools" width="24" height="24">  {{i}}</p>
+	{% endfor %}
+		
+</div>
+<div class="jumbotron">
+    <h2>{{count_reserved}} Codes Not Updated.</h2>
+    <h3> This  codes are already reserved.</h3>
+    <p></p>
+    {% for i in reserved_list %}
+    <p><img border="0" src="/static/img/warning.png" alt="W3Schools" width="24" height="24">  {{i}}</p>
+	{% endfor %}
+		
+</div>
+
+{% endblock %}

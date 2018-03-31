@@ -21,11 +21,17 @@ from flask_babel import gettext
 from flask_appbuilder import BaseView, expose, has_access
 
 from wtforms.validators import DataRequired, InputRequired
-from .helpers import adddoc3, bapco, tocsv, toxlsx, codes_to_xlsx
+from .helpers import adddoc3, bapco, tocsv, toxlsx, codes_to_xlsx, update_from_xlsx
 import csv
 from app import app
 from flask_appbuilder.actions import action
 from flask_appbuilder import filemanager
+from flask import request
+from werkzeug.utils import secure_filename
+from werkzeug.datastructures import ImmutableMultiDict
+import os
+
+ALLOWED_EXTENSIONS = set(['xlsx'])
 
 
 
@@ -227,15 +233,17 @@ class DocumentView(CompactCRUDMixin, ModelView):
                 print('item', item.code)
                 codes_list.append([item.code])
             filename = codes_to_xlsx(codes_list)
-            send_file('static/csv/'+ filename, as_attachment=True)
+            
 
             self.update_redirect()
+            
         else:
-            self.datamodel.delete(items)
+            filename = codes_to_xlsx(items.code)
         
         print(codes_list)
-        return redirect(self.get_redirect())
-
+        redirect(self.get_redirect())
+        #self.update_redirect()
+        return send_file('static/csv/' + filename, as_attachment=True)
 
 
 # Vendor Form Request
@@ -251,7 +259,8 @@ class VendorRequestsView(ModelView):
         'documentclass': 'Doc Class',
         'partner': 'Partner',
         'quantity': 'Doc Qty',
-        'request_type': 'Type'
+        'request_type': 'Type',
+        'csv': 'XLS'
     }
 
     base_order = ('id', 'desc')
@@ -344,7 +353,8 @@ class DocRequestsView(ModelView):
         'cdrlitem': 'CDRL Item',
         'documentclass': 'Doc Class',
         'partner': 'Partner',
-        'quantity': 'Doc Qty'
+        'quantity': 'Doc Qty',
+        'csv': 'XLS'
 
     }
     base_order = ('id', 'desc')
@@ -359,18 +369,18 @@ class DocRequestsView(ModelView):
     related_views = [DocumentView, PendingView]
     # list_widget = ListThumbnail
     title = "Bapco Engineering Code Request"
-    search_columns = ['created_by']
+    search_columns = ['created_by', 'created_on']
     
     list_columns = ['id', 'unit', 'materialclass', 'doctype', 'cdrlitem',
                     'documentclass', 'partner', 'quantity', 'created_by',
-                    'created_on']
+                    'created_on','created', 'csv']
     
     edit_columns = ['unit', 'materialclass', 'doctype', 'cdrlitem',
                     'documentclass', 'partner']
-
+    '''
     search_columns = ['unit', 'materialclass', 'doctype', 'cdrlitem',
-                      'documentclass', 'partner', 'quantity']
-
+                      'documentclass', 'partner', 'quantity', 'created_on']
+    '''
     add_exclude_columns = ['id', 'matrix']
 
     add_fieldsets = [
@@ -553,7 +563,61 @@ class ListRequest(ModelView):
                         ),
                      ]
 
+def allowed_file(filename):
+        return '.' in filename and \
+            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+
+class Uploadcodes(BaseView):
+    default_view = 'upload_form'
+    
+    @expose('/excel/', methods=['GET', 'POST'])
+    @has_access
+    def upload_form(self):
+        if request.method == 'POST':
+            print('we have it! POOOOST', request.files)
+            # check if the post request has the file part
+            
+            if 'file[]' not in request.files:
+                flash('No file part')
+                print('we have a problem with THE FORM !')
+                return redirect(request.url)
+            
+            
+            #file = request.files['file[]']
+            files = request.files
+            print('file is type of:', type(files))
+            if isinstance(files, ImmutableMultiDict):
+                print('is an ImmutableMultiDICT ! ****')
+                print('WE HAVE FILES !!', files)
+                # if user does not select file, browser also
+                # submit a empty part without filename
+                filename_list = []
+                files = dict(files)
+                reserved_list = []
+                updated_list = []
+                for file in files['file[]']:
+                    print('type of row', type(file), file)
+                    if file.filename == '':
+                        flash('No selected file')
+                        return redirect(request.url)
+                    if file and allowed_file(file.filename):
+                        print('IS ALLOWED FILE !!')
+                        filename = secure_filename(file.filename)
+                        filename_list.append(filename)
+                        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                        res_list, upd_list = update_from_xlsx(file)
+                        reserved_list += res_list
+                        updated_list += upd_list
+                        
+                return self.render_template('upload.html',
+                                            filename=filename_list,
+                                            updated_list=updated_list,
+                                            count_updated=len(updated_list),
+                                            reserved_list=reserved_list,
+                                            count_reserved=len(reserved_list))
+            
+        return self.render_template('upload.html')
 
 
 @appbuilder.app.errorhandler(404)
@@ -568,7 +632,9 @@ db.create_all()
 appbuilder.add_view(AskBapcoView, "Richiesta Codifica",
                     icon="fa-paper-plane", category="Ask Bapco",
                     category_icon='fa-bold')
-
+appbuilder.add_view(Uploadcodes, "Update from XLSX",
+                    icon="fa-paper-plane", category="Ask Bapco",
+                    category_icon='fa-bold')
 #appbuilder.add_view_no_menu(DocRequestsView)
 appbuilder.add_view(DocRequestsView, "Engineering Code Request",
                     icon="fa-paper-plane", category="Ask Bapco",
