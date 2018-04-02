@@ -271,7 +271,7 @@ class DocumentView(CompactCRUDMixin, ModelView):
         else:
             filename = codes_to_xlsx(items.code)
         
-        print(codes_list)
+        #print(codes_list)
         #redirect(self.get_redirect())
         self.update_redirect()
         return send_file('static/csv/' + filename, as_attachment=True)
@@ -405,7 +405,7 @@ class DocRequestsView(ModelView):
     add_title = 'Add Engineering Code Request'
     edit_title = 'Edit Engineering Code Request'
     show_title = 'Show Engineering Code Request'
-    related_views = [DocumentView, PendingView]
+    related_views = [DocumentView]
     # list_widget = ListThumbnail
     title = "Bapco Engineering Code Request"
     search_columns = ['created_by', 'created_on']
