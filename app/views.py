@@ -203,19 +203,20 @@ class PendingView(ModelView):
     @action("export", "Export","", "fa-table")
     def export(self, items):
         if isinstance(items, list):
+            print('Export this LIST: ', items)
             codes_list = []
             for item in items:
                 print('item', item.code)
                 codes_list.append([item.code])
             filename = codes_to_xlsx(codes_list)
-            
 
             self.update_redirect()
             
         else:
+            print('Export: is a single item', items)
             filename = codes_to_xlsx(items.code)
         
-        print(codes_list)
+        print('Export: The Codes List populated ', codes_list)
         redirect(self.get_redirect())
         #self.update_redirect()
         return send_file('static/csv/' + filename, as_attachment=True)
@@ -224,7 +225,7 @@ class PendingView(ModelView):
 
 class DocumentView(CompactCRUDMixin, ModelView):
     datamodel = SQLAInterface(Document)
-    list_title = 'All Bapco Codes'
+    list_title = 'Bapco Codes'
     
     base_order = ('id', 'desc')
     base_filters = [['created_by', FilterEqualFunction, get_user]]
@@ -255,8 +256,9 @@ class DocumentView(CompactCRUDMixin, ModelView):
             self.datamodel.delete(items)
         return redirect(self.get_redirect())
     
-    @action("export", "Export","", "fa-table")
+    @action("export", "Export", "", "fa-table")
     def export(self, items):
+        print('Export from DocumentView')
         if isinstance(items, list):
             codes_list = []
             for item in items:
@@ -264,15 +266,14 @@ class DocumentView(CompactCRUDMixin, ModelView):
                 codes_list.append([item.code])
             filename = codes_to_xlsx(codes_list)
             
-
             self.update_redirect()
             
         else:
             filename = codes_to_xlsx(items.code)
         
         print(codes_list)
-        redirect(self.get_redirect())
-        #self.update_redirect()
+        #redirect(self.get_redirect())
+        self.update_redirect()
         return send_file('static/csv/' + filename, as_attachment=True)
 
 
@@ -640,7 +641,7 @@ class ListRequest(ModelView):
     add_title = 'Add new Request'
     edit_title = 'Modifica Richiesta Codifica'
     show_title = 'Vista Richiesta Codifica'
-    related_views = [DocumentView, PendingView]
+    related_views = [DocumentView]
     #list_widget = ListThumbnail
     title = "Bapco Document ID Generator"
     label_columns = {

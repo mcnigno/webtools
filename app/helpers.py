@@ -229,7 +229,7 @@ def tocsv(self, item,  codes_list):
     '''
 def toxlsx(self, item,  codes_list):
     print('toXLSX FUNCTION')
-    print(codes_list)
+    print('this is the code list', codes_list)
     #filename = 'app/static/csv/bapco_request_'+ str(item.id) + '.xlsx'
 
     workbook = xlsxwriter.Workbook('app/static/csv/bapco_request_'+ str(item.id) + '.xlsx')
@@ -253,6 +253,7 @@ def toxlsx(self, item,  codes_list):
     # start after the header
     row = 1
     col = 0
+    print('this is the touple')
     print(tuple(codes_list))
     #worksheet.write(0,0,'something')
     t_list = tuple(codes_list)
@@ -263,7 +264,7 @@ def toxlsx(self, item,  codes_list):
     workbook.close()
 
 def codes_to_xlsx(codes_list):
-    print('CODEStoXLSX FUNCTION')
+    print('CODES toXLSX FUNCTION')
     print(codes_list)
     #filename = 'app/static/csv/bapco_request_'+ str(item.id) + '.xlsx'
     filename = 'Quasar|' + str(uuid.uuid4()) + '|bapco.xlsx'
@@ -292,7 +293,7 @@ def codes_to_xlsx(codes_list):
     #worksheet.write(0,0,'something')
     t_list = tuple(codes_list)
     for code in (t_list):
-        #print('Looping colist', code, row)
+        print('Looping colist', code, row)
         worksheet.write(row, col, str(code[0]))
         row += 1
     workbook.close()
