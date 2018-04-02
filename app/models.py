@@ -193,6 +193,9 @@ class Document(AuditMixin, Model):
     oldcode = Column(String(35), default='empty')
     docrequests_id = Column(Integer, ForeignKey('docrequests.id'))
     docrequests = relationship(DocRequests)
+    comments = Column(String(150))
+    notes = Column(String(150))
+    status = Column(String(30))
 
     def __repr__(self):
         name = 'some Document name'
@@ -228,3 +231,13 @@ class Document(AuditMixin, Model):
 
         else:
             return Markup('<span style="color:#5bc0de">[ '+'<span style="color:white">'+ self.code + '<span style="color:#5bc0de"> ]') 
+
+
+class Comments(Model):
+    __tablename__ = "comments"
+    id = Column(Integer, primary_key=True)
+    code = Column(String(35))
+    notes = Column(String(35))
+    rel = Column(String(30))
+    rel2 = Column(String(30))
+

@@ -5,7 +5,7 @@ from flask_appbuilder import (ModelView, CompactCRUDMixin, MasterDetailView,
 from app import appbuilder, db
 from .models import (DocRequests, Unit, Materialclass, Doctype,
                      Partner, Matrix, Document, Cdrlitem, Documentclass,
-                     Vendor, Mr)
+                     Vendor, Mr, Comments)
 from flask_appbuilder.fieldwidgets import Select2AJAXWidget
 from flask_appbuilder.fields import AJAXSelectField
 from flask_appbuilder.models.group import aggregate_count
@@ -899,16 +899,21 @@ class Uploadcodes(BaseView):
             '''
         return self.render_template('upload_status.html')
 
+class CommentsView(ModelView):
+    datamodel = SQLAInterface(Comments)
 
 @appbuilder.app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html', base_template=appbuilder.base_template,
                            appbuilder=appbuilder), 404
 
-
+## Flask migrate with Alembic instead of this
 db.create_all()
 
 # Risorse Bapco
+appbuilder.add_view(CommentsView, "Comments",
+                    icon="fa-paper-plane", category="Update Bapco",
+                    category_icon='fa-bold')
 
 appbuilder.add_view(Uploadcodes, "Update from XLSX",
                     icon="fa-paper-plane", category="Update Bapco",
