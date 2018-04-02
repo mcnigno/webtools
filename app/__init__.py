@@ -2,10 +2,7 @@ import logging
 from flask import Flask
 from flask.ext.appbuilder import SQLA, AppBuilder
 from app.index import MyIndexView
-from flask_migrate import Migrate, upgrade, init, command, Config
-from app import models
-from app.models import Materialclass
-import os
+
 
 
 
