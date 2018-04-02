@@ -298,7 +298,8 @@ class VendorRequestsView(ModelView):
     base_filters = [['created_by', FilterEqualFunction, get_user],
                     ['request_type', FilterEqual, 'vendor']
                     ]
-    
+    base_permissions = ['can_add','can_list','can_show'] 
+
     validators_columns = {'vendor': [DataRequired(message='NOT Released: Vendor is required')],
                           'mr': [DataRequired(message='NOT Released: MR is required')]
     }
@@ -307,7 +308,7 @@ class VendorRequestsView(ModelView):
     add_title = 'Add Vendor Code Request'
     edit_title = 'Edit Vendor Code Request'
     show_title = 'Show Vendor Code Request'
-    related_views = [DocumentView, PendingView]
+    related_views = [DocumentView]
     # list_widget = ListThumbnail
     title = "Bapco Vendor Code Request"
     search_columns = ['created_by']
