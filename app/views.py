@@ -21,7 +21,7 @@ from flask_babel import gettext
 from flask_appbuilder import BaseView, expose, has_access
 
 from wtforms.validators import DataRequired, InputRequired
-from .helpers import adddoc3, bapco, tocsv, toxlsx, codes_to_xlsx, update_from_xlsx
+from .helpers import adddoc3, bapco, tocsv, toxlsx, codes_to_xlsx, update_from_xlsx, setting_update
 import csv
 from app import app
 from flask_appbuilder.actions import action
@@ -181,20 +181,45 @@ class PendingView(ModelView):
     base_order = ('id', 'desc')
     base_filters = [['oldcode', FilterStartsWith, 'empty'],
                     ['created_by', FilterEqualFunction, get_user]]
+    
+    base_permissions = ['can_list', 'can_show', 'can_edit'] 
 
     edit_title = 'Edit Code'
     show_title = 'Show Code'
     
-    list_columns = ['id', 'created_by', 'status', 'oldcode', 'code']
+    list_columns = ['code_type', 'bapco_code', 'oldcode', 'created_by', 'created', 'status']
     edit_columns = ['oldcode']
     
     label_columns = {
         'id': 'ID',
+        'created': 'Created On',
+        'modified': 'Modified On',
+        'changed_by': 'Modified By',
         'status': 'Status',
         'oldcode': 'Contractor Code',
         'code': 'Bapco Code',
     }
     
+    @action("export", "Export","", "fa-table")
+    def export(self, items):
+        if isinstance(items, list):
+            codes_list = []
+            for item in items:
+                print('item', item.code)
+                codes_list.append([item.code])
+            filename = codes_to_xlsx(codes_list)
+            
+
+            self.update_redirect()
+            
+        else:
+            filename = codes_to_xlsx(items.code)
+        
+        print(codes_list)
+        redirect(self.get_redirect())
+        #self.update_redirect()
+        return send_file('static/csv/' + filename, as_attachment=True)
+
 
 
 class DocumentView(CompactCRUDMixin, ModelView):
@@ -203,18 +228,23 @@ class DocumentView(CompactCRUDMixin, ModelView):
     
     base_order = ('id', 'desc')
     base_filters = [['created_by', FilterEqualFunction, get_user]]
+    base_permissions = ['can_list', 'can_show', 'can_edit'] 
 
     edit_title = 'Edit Code'
     show_title = 'Show Code'
 
-    list_columns = ['id', 'created_by', 'status', 'oldcode', 'code']
+    list_columns = ['id', 'code_type', 'bapco_code', 'oldcode', 'created_by', 'created', 'status']
     edit_columns = ['oldcode']
     
     label_columns = {
         'id': 'ID',
+        'created': 'Created On',
+        'modified': 'Modified On',
+        'changed_by': 'Modified By',
         'status': 'Status',
         'oldcode': 'Contractor Code',
         'code': 'Bapco Code',
+        'code_type': 'Type',
     }
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
     def muldelete(self, items):
@@ -225,7 +255,7 @@ class DocumentView(CompactCRUDMixin, ModelView):
             self.datamodel.delete(items)
         return redirect(self.get_redirect())
     
-    @action("export", "Export", "Export all Really?", "fa-rocket")
+    @action("export", "Export","", "fa-table")
     def export(self, items):
         if isinstance(items, list):
             codes_list = []
@@ -281,9 +311,15 @@ class VendorRequestsView(ModelView):
     title = "Bapco Vendor Code Request"
     search_columns = ['created_by']
     
-    list_columns = ['id', 'unit', 'materialclass', 'doctype', 'cdrlitem',
-                    'documentclass', 'partner', 'quantity', 'vendor', 'mr', 
-                    'created_by', 'request_type', 'created_on', 'csv']
+    label_columns = {
+        'csv': 'XLS',
+        'req_type': 'Type',
+        'req_description': 'Description',
+        'created': 'Created on'
+
+    }
+    
+    list_columns = ['req_type', 'req_description', 'created', 'csv']
     
     edit_columns = ['unit', 'materialclass', 'doctype', 'cdrlitem',
                     'documentclass', 'partner', 'vendor', 'mr', ]
@@ -313,7 +349,7 @@ class VendorRequestsView(ModelView):
     show_fieldsets = [
                         (
                             'Number of Bapco Codes',
-                            {'fields': ['quantity']}
+                            {'fields': ['req_type', 'quantity']}
                         ),
                         (
                             'Bapco Code',
@@ -328,7 +364,7 @@ class VendorRequestsView(ModelView):
 
     
     def post_add(self, item):
-        choice_unit(self, item)
+        #choice_unit(self, item)
         session_list = []
         for i in range(0, item.quantity):
             print('****** Vendor Code Released ******')
@@ -361,6 +397,7 @@ class DocRequestsView(ModelView):
     base_filters = [['created_by', FilterEqualFunction, get_user],
                     ['request_type', FilterEqual, 'engineering']
                     ]
+    base_permissions = ['can_add','can_list','can_show'] 
 
     list_title = 'Engineering Code Request'
     add_title = 'Add Engineering Code Request'
@@ -371,9 +408,15 @@ class DocRequestsView(ModelView):
     title = "Bapco Engineering Code Request"
     search_columns = ['created_by', 'created_on']
     
-    list_columns = ['id', 'unit', 'materialclass', 'doctype', 'cdrlitem',
-                    'documentclass', 'partner', 'quantity', 'created_by',
-                    'created_on','created', 'csv']
+    label_columns = {
+        'csv': 'XLS',
+        'req_type': 'Type',
+        'req_description': 'Description',
+        'created': 'Created on'
+
+    }
+    
+    list_columns = ['req_type', 'req_description', 'created', 'csv']
     
     edit_columns = ['unit', 'materialclass', 'doctype', 'cdrlitem',
                     'documentclass', 'partner']
@@ -422,7 +465,8 @@ class DocRequestsView(ModelView):
                                             }
 
     def post_add(self, item):
-        choice_unit(self, item)
+        #choice_unit(self, item)
+        print('after cHoice')
         session_list = []
         for i in range(0, item.quantity):
             print('****** Engineering Code Released ******')
@@ -442,46 +486,112 @@ class AskBapcoView(MultipleView):
 
 class UnitView(CompactCRUDMixin, ModelView):
     datamodel = SQLAInterface(Unit)
-    list_columns = ['unit', 'unit_type', 'description']
+    list_columns = ['unit','name', 'unit_type', 'description']
     # list_widget = ListCarousel
     # label_columns = ['unit','description']
+    @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
+    def muldelete(self, items):
+        if isinstance(items, list):
+            self.datamodel.delete_all(items)
+            self.update_redirect()
+        else:
+            self.datamodel.delete(items)
+        return redirect(self.get_redirect())
 
 
 class MaterialclassView(ModelView):
     datamodel = SQLAInterface(Materialclass)
-    list_columns = ['materialclass', 'description']
-
+    list_columns = ['materialclass','name', 'description']
+    @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
+    def muldelete(self, items):
+        if isinstance(items, list):
+            self.datamodel.delete_all(items)
+            self.update_redirect()
+        else:
+            self.datamodel.delete(items)
+        return redirect(self.get_redirect())
 
 class DoctypeView(ModelView):
     datamodel = SQLAInterface(Doctype)
-    list_columns = ['doctype', 'description', 'name']
-
+    list_columns = ['doctype', 'name', 'description']
+    
+    @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
+    def muldelete(self, items):
+        if isinstance(items, list):
+            self.datamodel.delete_all(items)
+            self.update_redirect()
+        else:
+            self.datamodel.delete(items)
+        return redirect(self.get_redirect())
 
 class PartnerView(ModelView):
     datamodel = SQLAInterface(Partner)
-    list_columns = ['partner', 'description']
+    #list_columns = ['partner', 'description']
     # list_widget = ListThumbnail
 
+    @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
+    def muldelete(self, items):
+        if isinstance(items, list):
+            self.datamodel.delete_all(items)
+            self.update_redirect()
+        else:
+            self.datamodel.delete(items)
+        return redirect(self.get_redirect())
 
 class CdrlitemView(ModelView):
     datamodel = SQLAInterface(Cdrlitem)
-    list_columns = ['cdrlitem', 'description']
+    list_columns = ['cdrlitem', 'name', 'description']
+
+    @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
+    def muldelete(self, items):
+        if isinstance(items, list):
+            self.datamodel.delete_all(items)
+            self.update_redirect()
+        else:
+            self.datamodel.delete(items)
+        return redirect(self.get_redirect())
 
 
 class DocumentclassView(ModelView):
     datamodel = SQLAInterface(Documentclass)
-    list_columns = ['documentclass', 'description']
+    list_columns = ['documentclass','name', 'description']
+
+    @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
+    def muldelete(self, items):
+        if isinstance(items, list):
+            self.datamodel.delete_all(items)
+            self.update_redirect()
+        else:
+            self.datamodel.delete(items)
+        return redirect(self.get_redirect())
 
 
 class VendorView(ModelView):
     datamodel = SQLAInterface(Vendor)
     list_columns = ['vendor', 'description']
 
+    @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
+    def muldelete(self, items):
+        if isinstance(items, list):
+            self.datamodel.delete_all(items)
+            self.update_redirect()
+        else:
+            self.datamodel.delete(items)
+        return redirect(self.get_redirect())
+
 
 class MrView(ModelView):
     datamodel = SQLAInterface(Mr)
-    list_columns = ['mr', 'description']
+    #list_columns = ['mr', 'description']
 
+    @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
+    def muldelete(self, items):
+        if isinstance(items, list):
+            self.datamodel.delete_all(items)
+            self.update_redirect()
+        else:
+            self.datamodel.delete(items)
+        return redirect(self.get_redirect())
 
 class MatrixView(ModelView):
     datamodel = SQLAInterface(Matrix)
@@ -492,6 +602,14 @@ class GroupMasterView(MasterDetailView):
     datamodel = SQLAInterface(Doctype)
     related_views = [DocRequestsView]
 
+    @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
+    def muldelete(self, items):
+        if isinstance(items, list):
+            self.datamodel.delete_all(items)
+            self.update_redirect()
+        else:
+            self.datamodel.delete(items)
+        return redirect(self.get_redirect())
 
 class MultipleViewsExp(MultipleView):
     views = [UnitView, MaterialclassView, DoctypeView, PartnerView]
@@ -516,23 +634,26 @@ class ListRequest(ModelView):
     datamodel = SQLAInterface(DocRequests)
     base_order = ('id', 'desc')
     base_filters = [['created_by', FilterEqualFunction, get_user]]
+    base_permissions = ['can_list', 'can_show'] 
 
     list_title = 'All Requests'
     add_title = 'Add new Request'
     edit_title = 'Modifica Richiesta Codifica'
     show_title = 'Vista Richiesta Codifica'
     related_views = [DocumentView, PendingView]
-    # list_widget = ListThumbnail
+    #list_widget = ListThumbnail
     title = "Bapco Document ID Generator"
-    search_columns = ['created_by']
+    label_columns = {
+        'csv': 'XLS',
+        'req_type': 'Type',
+        'req_description': 'Description',
+        'created': 'Created on'
 
-    list_columns = ['id', 'unit', 'materialclass', 'doctype',
-                    'partner', 'quantity', 'created_by', 'created_on', 'request_type']
-
+    }
+    
+    list_columns = ['req_type', 'req_description', 'created', 'csv']
     edit_columns = ['unit', 'materialclass', 'doctype', 'partner']
 
-    search_columns = ['unit', 'materialclass', 'doctype', 'partner',
-                      'quantity']
 
     add_exclude_columns = ['id', 'matrix']
 
@@ -567,18 +688,94 @@ def allowed_file(filename):
         return '.' in filename and \
             filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+class Setting_updateView(BaseView):
+    default_view = 'upload_setting'
+
+    @expose('/setting/', methods=['POST','GET'])
+    @has_access
+    def upload_setting(self):
+        if request.method == 'POST':
+            
+            if 'file' not in request.files:
+                flash('No file part')
+                print('we have a problem with THE FORM !')
+                return redirect(request.url)
+       
+            files = request.files
+            print('file is type of:', type(files))
+            
+            if isinstance(files, ImmutableMultiDict):
+                print('is an ImmutableMultiDICT ! ****')
+                print('WE HAVE FILES !!', files)
+                
+                files = dict(files)
+                filename_list = []
+                reserved_list = []
+                updated_list = []
+                
+                print('lunghezza files: ', len(files['file']))
+                files = files['file']
+                print('Files afteer DICT',files)
+                
+                for file in files:
+                    #file = file[0]
+                    print('type of row', type(file), file)
+                    if file.filename == '':
+                        flash('No selected file')
+                        return redirect(request.url)
+                    if file and allowed_file(file.filename):
+                        print('IS ALLOWED FILE !!')
+                        filename = secure_filename(file.filename)
+                        filename_list.append(filename)
+                        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                        res_list, upd_list = setting_update(file)
+                        for item in res_list:
+                            flash('WARNING: '+ str(item[1])+'is already reserved by '+ str(item[2]), category='warning')
+                        reserved_list += res_list
+                        updated_list += upd_list
+                        
+                        print('reserdev list:', reserved_list)
+                        print('updated list:', updated_list)
+                        self.update_redirect()
+                
+                flash('Update: '+ str(len(files)) +' files processed, '+ str(len(updated_list))+' total settings updated.', category='info')
+                return self.render_template('setting_up.html',
+                                            filename=filename_list,
+                                            updated_list=updated_list,
+                                            count_updated=len(updated_list),
+                                            reserved_list=reserved_list,
+                                            count_reserved=len(reserved_list))
+            '''
+                return redirect(url_for('Uploadcodes.upload',
+                                        filename=filename_list,
+                                        updated_list=updated_list,
+                                        count_updated=len(updated_list),
+                                        reserved_list=reserved_list,
+                                        count_reserved=len(reserved_list)))
+            '''
+        return self.render_template('setting_up.html')
+
 
 class Uploadcodes(BaseView):
-    default_view = 'upload_form'
     
-    @expose('/excel/', methods=['GET', 'POST'])
+    default_view = 'upload_form'
+    '''
+    @expose('/excel/') 
+    @has_access
+    def upload(self):
+        print('GET METHOD HERE')
+        
+        return self.render_template('upload.html', filename=["pippo","pappo"])
+    '''
+    @expose('/excel/', methods=['POST', 'GET'])
     @has_access
     def upload_form(self):
         if request.method == 'POST':
+            print('request FORM', request.form)
             print('we have it! POOOOST', request.files)
             # check if the post request has the file part
             
-            if 'file[]' not in request.files:
+            if 'file' not in request.files:
                 flash('No file part')
                 print('we have a problem with THE FORM !')
                 return redirect(request.url)
@@ -596,7 +793,77 @@ class Uploadcodes(BaseView):
                 files = dict(files)
                 reserved_list = []
                 updated_list = []
-                for file in files['file[]']:
+                print('lunghezza files: ', len(files['file']))
+                files = files['file']
+                print('Files afteer DICT',files)
+                for file in files:
+                    #file = file[0]
+                    print('type of row', type(file), file)
+                    if file.filename == '':
+                        flash('No selected file')
+                        return redirect(request.url)
+                    if file and allowed_file(file.filename):
+                        print('IS ALLOWED FILE !!')
+                        filename = secure_filename(file.filename)
+                        filename_list.append(filename)
+                        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                        res_list, upd_list = update_from_xlsx(file)
+                        for item in res_list:
+                            flash('WARNING: '+ str(item[1])+'is already reserved by '+ str(item[2]), category='warning')
+                        reserved_list += res_list
+                        updated_list += upd_list
+                        
+                        print('reserdev list:', reserved_list)
+                        print('updated list:', updated_list)
+                        self.update_redirect()
+                
+                flash('Update: '+ str(len(files)) +' files processed, '+ str(len(updated_list))+' total codes updated.', category='info')
+                return self.render_template('upload_status.html',
+                                            filename=filename_list,
+                                            updated_list=updated_list,
+                                            count_updated=len(updated_list),
+                                            reserved_list=reserved_list,
+                                            count_reserved=len(reserved_list))
+            '''
+                return redirect(url_for('Uploadcodes.upload',
+                                        filename=filename_list,
+                                        updated_list=updated_list,
+                                        count_updated=len(updated_list),
+                                        reserved_list=reserved_list,
+                                        count_reserved=len(reserved_list)))
+            '''
+        return self.render_template('upload.html')
+
+    @expose('/excel/ajax', methods=['POST', 'GET'])
+    @has_access
+    def ajax_upload_form(self):
+        if request.method == 'POST':
+            print('request FORM', request.form)
+            print('we have it! POOOOST', request.files)
+            # check if the post request has the file part
+            
+            if 'file[0]' not in request.files:
+                flash('No file part')
+                print('we have a problem with THE FORM !')
+                return redirect(request.url)
+            
+            
+            #file = request.files['file[]']
+            files = request.files
+            print('file is type of:', type(files))
+            if isinstance(files, ImmutableMultiDict):
+                print('is an ImmutableMultiDICT ! ****')
+                print('WE HAVE FILES !!', files)
+                # if user does not select file, browser also
+                # submit a empty part without filename
+                filename_list = []
+                files = dict(files)
+                reserved_list = []
+                updated_list = []
+                print('lunghezza files: ',len(files))
+                print('Files afteer DICT',files)
+                for k, file in files.items():
+                    file = file[0]
                     print('type of row', type(file), file)
                     if file.filename == '':
                         flash('No selected file')
@@ -609,15 +876,26 @@ class Uploadcodes(BaseView):
                         res_list, upd_list = update_from_xlsx(file)
                         reserved_list += res_list
                         updated_list += upd_list
-                        
-                return self.render_template('upload.html',
-                                            filename=filename_list,
-                                            updated_list=updated_list,
-                                            count_updated=len(updated_list),
-                                            reserved_list=reserved_list,
-                                            count_reserved=len(reserved_list))
-            
-        return self.render_template('upload.html')
+                        flash('here we are', category='warning')
+                        print('reserdev list:', reserved_list)
+                        print('updated list:', updated_list)
+                        self.update_redirect()
+                      
+            return self.render_template('upload_status.html',
+                                        filename=filename_list,
+                                        updated_list=updated_list,
+                                        count_updated=len(updated_list),
+                                        reserved_list=reserved_list,
+                                        count_reserved=len(reserved_list))
+            '''
+                return redirect(url_for('Uploadcodes.upload',
+                                        filename=filename_list,
+                                        updated_list=updated_list,
+                                        count_updated=len(updated_list),
+                                        reserved_list=reserved_list,
+                                        count_reserved=len(reserved_list)))
+            '''
+        return self.render_template('upload_status.html')
 
 
 @appbuilder.app.errorhandler(404)
@@ -629,11 +907,9 @@ def page_not_found(e):
 db.create_all()
 
 # Risorse Bapco
-appbuilder.add_view(AskBapcoView, "Richiesta Codifica",
-                    icon="fa-paper-plane", category="Ask Bapco",
-                    category_icon='fa-bold')
+
 appbuilder.add_view(Uploadcodes, "Update from XLSX",
-                    icon="fa-paper-plane", category="Ask Bapco",
+                    icon="fa-paper-plane", category="Update Bapco",
                     category_icon='fa-bold')
 #appbuilder.add_view_no_menu(DocRequestsView)
 appbuilder.add_view(DocRequestsView, "Engineering Code Request",
@@ -644,18 +920,23 @@ appbuilder.add_view(VendorRequestsView, "Vendor Code Request",
                     icon="fa-paper-plane", category="Ask Bapco",
                     category_icon='fa-bold')
 
-appbuilder.add_view(ListRequest, "Elenco Richieste",
-                    icon="fa-codepen", category="Ask Bapco")
 
 appbuilder.add_separator(category='Ask Bapco')
-appbuilder.add_view(DocumentView, "Elenco Codifiche",
-                    icon="fa-list", category="Ask Bapco")
 
-appbuilder.add_view(PendingView, "Elenco Codifiche in Pending",
-                    icon="fa-folder-open", category="Ask Bapco",
+appbuilder.add_view(ListRequest, "All Requests",
+                    icon="fa-codepen", category="Ask Bapco")
+
+appbuilder.add_view(DocumentView, "All Your Codes",
+                    icon="fa-list", category="Bapco Codes")
+
+appbuilder.add_view(PendingView, "Only Pending Codes",
+                    icon="fa-folder-open", category="Bapco Codes",
                     category_icon='fa-bold')
 
 # Bapco Setting
+appbuilder.add_view(Setting_updateView, "Update Setting from XLSX",
+                    icon="fa-cogs", category="Bapco Settings",
+                    category_icon='fa-cubes')
 
 appbuilder.add_view(MultipleViewsExp, "Smart Settings",
                     icon="fa-cogs", category="Bapco Settings",

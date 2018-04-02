@@ -2,7 +2,8 @@ from app import db
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask import flash, send_file, make_response, redirect, url_for
 
-from .models import Matrix, Document, Unit, Partner
+from .models import (Matrix, Document, Unit, Materialclass, Doctype, Partner,
+                     Cdrlitem, Documentclass, Mr, Vendor)
 #from .views import send_csv
 import csv, xlsxwriter
 from werkzeug.utils import secure_filename
@@ -324,7 +325,73 @@ def update_from_xlsx(file):
             reserved_list.append([doc.id, doc.code, doc.oldcode])
     return reserved_list, updated_list
 
-   
 
+def setting_update(file):
+    session = db.session
+    print('Setting Update start')
+    book = openpyxl.load_workbook(file)
+    sheet = book.active
+    set_class = sheet['A1'].value
+    print('the setting class:', set_class)
+
+    reserved_list = []
+    updated_list = []
+
+    for row in sheet.iter_rows(min_row=2):
+        param = row[0].value
+        name = row[1].value
+        desc = row[2].value
+        print(param, name, desc)
+        set_dict = {
+            'Unit': [Unit, Unit.unit, 'unit'],
+            'Materialclass': [Materialclass, Materialclass.materialclass],
+            'Doctype': [Doctype, Doctype.doctype],
+            'Cdrlitem': [Cdrlitem, Cdrlitem.cdrlitem],
+            'Documentclass': [Documentclass, Documentclass.documentclass],
+            'Mr': [Mr, Mr.mr],
+            'Vendor': [Vendor, Vendor.vendor],
+            'Partner': [Partner, Partner.partner]
+        }
+        # Update the setting if a param already exist
+        tmp_class = set_dict[set_class][0]
+        tmp_param = set_dict[set_class][1]
+        my_class = db.session.query(tmp_class).filter(tmp_param == str(param)).first()
+        
+        datamodel = SQLAInterface(tmp_class, session=session)
+        
+        if my_class:
+            print(my_class)
+            my_class.name = name
+            my_class.description = desc
+            datamodel.edit(my_class)
+            updated_list.append([my_class.id, my_class.name, my_class.description])
+        else:
+            # or Create new record in setting
             
+            my_class = tmp_class()
+            if set_class == 'Unit':
+                my_class.unit = param
+            elif set_class == 'Materialclass':
+                my_class.materialclass = param
+            elif set_class == 'Doctype':
+                my_class.doctype = param
+            elif set_class == 'Cdrlitem':
+                my_class.cdrlitem = param
+            elif set_class == 'Documentclass':
+                my_class.documentclass = param
+            elif set_class == 'Mr':
+                my_class.mr = param
+            elif set_class == 'Vendor':
+                my_class.vendor = param
+            elif set_class == 'Partner':
+                my_class.partner = param
+            
+            else:
+                return print('Setting Class NOT Found')
+            
+            my_class.name = name
+            my_class.description = desc
+            datamodel.add(my_class)
+            reserved_list.append([my_class.id, my_class.name, my_class.description])
 
+    return reserved_list, updated_list

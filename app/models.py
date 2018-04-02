@@ -38,7 +38,7 @@ class Materialclass(Model):
     description = Column(String(100))
 
     def __repr__(self):
-        return self.materialclass
+        return self.materialclass + self.name
 
 class Doctype(Model):
     __tablename__ = "doctype"
@@ -146,19 +146,44 @@ class DocRequests(AuditMixin, Model):
     
 
     def __repr__(self):
-        name = str(self.unit) + str(self.materialclass) + str(self.doctype)
-        return name
+        doc_param = "-".join([str(x) for x in [self.unit, self.materialclass, self.doctype]])
+
+        return '[ '+ str(self.quantity) +' ] '+ doc_param + ' by ' + str(self.created_by) +' on ' + str(self.created())
     
     # def __init__(self):
     def csv(self):
         return Markup('<a href="/static/csv/bapco_request_'+ str(self.id) +'.xlsx" download>'+'<img border="0" src="/static/img/excel.png" alt="W3Schools" width="24" height="24">'+'</a>')
-    
+        
     def created(self):
         #date = self.created_on
         #return date.strftime('We are the %d, %b %Y')
-        return self.created_on.strftime('%d, %b %Y')
+        return self.created_on.strftime('%d, %b %Y - %H:%M:%S')
     
+    def modified(self):
+        #date = self.created_on
+        #return date.strftime('We are the %d, %b %Y')
+        return self.changed_on.strftime('%d, %b %Y - %H:%M:%S')
     
+    def req_type(self):
+        if self.request_type == 'vendor':
+            return Markup('<img border="0" src="/static/img/vendor.png" alt="W3Schools" width="24" height="24"> ' + self.request_type[0:3] )
+        
+        elif self.request_type == 'engineering':
+            return Markup('<img border="0" src="/static/img/engineering.png" alt="W3Schools" width="24" height="24"> ' + self.request_type[0:3] )
+        
+        else:
+            return '#ND'
+    
+    def req_description(self):
+        req_code = str(self.unit) + ' '+ str(self.materialclass.materialclass) + ' '+  str(self.doctype)
+        req_quantity = str(self.quantity)
+        desc_eng = 'Request by ' +'<strong>'+ str(self.created_by) +'</strong>' + ' for '+'<span style="color:#f89406">[ ' +'</span><strong>'+ req_quantity +'</strong>'+ '<span style="color:#f89406">'+ ' ] </span>' + '</span></strong>'+ req_code
+        desc_vend = 'Request by ' +'<strong>'+ str(self.created_by) +'</strong>' + ' for '+'<span style="color:#f89406">[ ' +'</span><strong>'+ req_quantity +'</strong>'+ '<span style="color:#f89406">'+ ' ] </span>' + '</span></strong>'+ req_code  + ' | <span style="color:#5bc0de">'+ str(self.vendor)+'</span> -> '+ str(self.mr)+' |'
+        
+        if self.request_type == 'vendor':
+            return Markup(desc_vend)
+        return Markup(desc_eng)
+
     
     
 class Document(AuditMixin, Model):
@@ -174,6 +199,32 @@ class Document(AuditMixin, Model):
         return name
 
     def status(self):
-        if self.oldcode != 'empty':
-            return Markup('<img border="0" src="/static/img/reserved.png" alt="W3Schools" width="16" height="16">'+' Reserved')
-        return Markup('<img border="0" src="/static/img/pending.png" alt="W3Schools" width="16" height="16">'+' Pending')
+        if self.oldcode == 'empty':
+            return Markup('<img border="0" src="/static/img/pending.png" alt="W3Schools" width="16" height="16">'+' P')
+        elif self.oldcode == 'void':
+            return Markup('<img border="0" src="/static/img/destroyed.png" alt="W3Schools" width="16" height="16">'+' D')
+        else:
+            return Markup('<img border="0" src="/static/img/reserved.png" alt="W3Schools" width="16" height="16">'+' R')
+
+    def code_type(self):
+        return self.docrequests.req_type()
+
+    def created(self):
+        #date = self.created_on
+        #return date.strftime('We are the %d, %b %Y')
+        return self.created_on.strftime('%d, %b %Y - %H:%M:%S')
+    
+    def modified(self):
+        #date = self.created_on
+        #return date.strftime('We are the %d, %b %Y')
+        return self.changed_on.strftime('%d, %b %Y - %H:%M:%S')
+    
+    def bapco_code(self):
+        if self.oldcode == 'empty':
+            return Markup('<span style="color:#f89406">[ '+'<span style="color:white">'+ self.code + '<span style="color:#f89406"> ]')
+        
+        elif self.oldcode == 'void':
+            return Markup('<span style="color:#ee5f5b">[ '+'<span style="color:white">'+ self.code + '<span style="color:#ee5f5b"> ]')
+
+        else:
+            return Markup('<span style="color:#5bc0de">[ '+'<span style="color:white">'+ self.code + '<span style="color:#5bc0de"> ]') 
