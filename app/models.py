@@ -21,7 +21,7 @@ class Unit(Model):
     __tablename__ = "unit"
     id = Column(Integer, primary_key=True)
     unit = Column(String(3), unique=True, nullable=False)
-    name = Column(String(35), nullable=False)
+    name = Column(String(35))
     start = Column(Integer, default=0)
     stop = Column(Integer)
     unit_type = Column(String(20), default='standard') 
@@ -33,18 +33,18 @@ class Unit(Model):
 class Materialclass(Model):
     __tablename__ = "materialclass"
     id = Column(Integer, primary_key=True)
-    materialclass = Column(String(1))
-    name = Column(String(35), nullable=False)
+    materialclass = Column(String(1), unique=True, nullable=False)
+    name = Column(String(35))
     description = Column(String(100))
 
     def __repr__(self):
-        return self.materialclass + self.name
+        return self.materialclass 
 
 class Doctype(Model):
     __tablename__ = "doctype"
     id = Column(Integer, primary_key=True)
-    doctype = Column(String(3))
-    name = Column(String(35), nullable=False)
+    doctype = Column(String(3), unique=True, nullable=False)
+    name = Column(String(35))
     description = Column(String(100))
     
     def __repr__(self):
@@ -53,8 +53,8 @@ class Doctype(Model):
 class Partner(Model):
     __tablename__ = "partner"
     id = Column(Integer, primary_key=True)
-    partner = Column(String(20))
-    name = Column(String(35), nullable=False)
+    partner = Column(String(20), unique=True, nullable=False)
+    name = Column(String(35))
     description = Column(String(100))
     common_start = Column(Integer, default=0)
     common_stop = Column(Integer, default=0)
@@ -66,8 +66,8 @@ class Partner(Model):
 class Documentclass(Model):
     __tablename__ = "documentclass"
     id = Column(Integer, primary_key=True)
-    documentclass = Column(String(35), unique=True)
-    name = Column(String(35), nullable=False)
+    documentclass = Column(String(35), unique=True, nullable=False)
+    name = Column(String(35))
     description = Column(String(100))
 
     def __repr__(self):
@@ -77,8 +77,8 @@ class Documentclass(Model):
 class Cdrlitem(Model):
     __tablename__ = "cdrlitem"
     id = Column(Integer, primary_key=True)
-    cdrlitem = Column(String(35), unique=True)
-    name = Column(String(35), nullable=False)
+    cdrlitem = Column(String(35), unique=True, nullable=False)
+    name = Column(String(35))
     description = Column(String(100))
 
     def __repr__(self):
@@ -88,8 +88,8 @@ class Cdrlitem(Model):
 class Vendor(Model):
     __tablename__ = "vendor"
     id = Column(Integer, primary_key=True)
-    vendor = Column(String(35), unique=True)
-    name = Column(String(35), nullable=False)
+    vendor = Column(String(35), unique=True, nullable=False)
+    name = Column(String(35))
     description = Column(String(100))
 
     def __repr__(self):
@@ -99,8 +99,8 @@ class Vendor(Model):
 class Mr(Model):
     __tablename__ = "mr"
     id = Column(Integer, primary_key=True)
-    mr = Column(String(35), unique=True)
-    name = Column(String(35), nullable=False)
+    mr = Column(String(35), unique=True, nullable=False)
+    name = Column(String(35))
     description = Column(String(100))
 
     def __repr__(self):
@@ -155,24 +155,26 @@ class DocRequests(AuditMixin, Model):
         return Markup('<a href="/static/csv/bapco_request_'+ str(self.id) +'.xlsx" download>'+'<img border="0" src="/static/img/excel.png" alt="W3Schools" width="24" height="24">'+'</a>')
         
     def created(self):
-        #date = self.created_on
-        #return date.strftime('We are the %d, %b %Y')
+        date = self.created_on
+        return date.strftime('We are the %d, %b %Y')
         return self.created_on.strftime('%d, %b %Y - %H:%M:%S')
     
     def modified(self):
-        #date = self.created_on
+        date = self.created_on
         #return date.strftime('We are the %d, %b %Y')
         return self.changed_on.strftime('%d, %b %Y - %H:%M:%S')
     
     def req_type(self):
+        
         if self.request_type == 'vendor':
-            return Markup('<img border="0" src="/static/img/vendor.png" alt="W3Schools" width="24" height="24"> ' + self.request_type[0:3] )
-        
+            return Markup('<img border="0" src="/static/img/vendor.png" alt="W3Schools" width="24" height="24"> ' + self.request_type[0:3])
+            
         elif self.request_type == 'engineering':
-            return Markup('<img border="0" src="/static/img/engineering.png" alt="W3Schools" width="24" height="24"> ' + self.request_type[0:3] )
-        
+            return Markup('<img border="0" src="/static/img/engineering.png" alt="W3Schools" width="24" height="24"> ' + self.request_type[0:3])
+            
         else:
             return '#ND'
+        
     
     def req_description(self):
         req_code = str(self.unit) + ' '+ str(self.materialclass.materialclass) + ' '+  str(self.doctype)
@@ -182,8 +184,8 @@ class DocRequests(AuditMixin, Model):
         
         if self.request_type == 'vendor':
             return Markup(desc_vend)
+            #return 'description1'
         return Markup(desc_eng)
-
     
     
 class Document(AuditMixin, Model):

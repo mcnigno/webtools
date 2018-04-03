@@ -21,7 +21,7 @@ from flask_babel import gettext
 from flask_appbuilder import BaseView, expose, has_access
 
 from wtforms.validators import DataRequired, InputRequired
-from .helpers import adddoc3, bapco, tocsv, toxlsx, codes_to_xlsx, update_from_xlsx, setting_update
+from .helpers import adddoc3, bapco, tocsv, toxlsx, codes_to_xlsx, update_from_xlsx, setting_update, old_codes_update
 import csv
 from app import app
 from flask_appbuilder.actions import action
@@ -281,6 +281,7 @@ class DocumentView(CompactCRUDMixin, ModelView):
 class VendorRequestsView(ModelView):
     datamodel = SQLAInterface(DocRequests)
     default_view = 'list'
+    
     label_columns = {
         'id': 'ID',
         'unit': 'Unit',
@@ -295,11 +296,13 @@ class VendorRequestsView(ModelView):
     }
 
     base_order = ('id', 'desc')
+    
     base_filters = [['created_by', FilterEqualFunction, get_user],
                     ['request_type', FilterEqual, 'vendor']
                     ]
+    
     base_permissions = ['can_add','can_list','can_show'] 
-
+    
     validators_columns = {'vendor': [DataRequired(message='NOT Released: Vendor is required')],
                           'mr': [DataRequired(message='NOT Released: MR is required')]
     }
@@ -757,6 +760,76 @@ class Setting_updateView(BaseView):
             '''
         return self.render_template('setting_up.html')
 
+class Oldcodes(BaseView):
+    default_view = 'oldcodes'
+    @expose('/oldcodes/', methods=['POST', 'GET'])
+    @has_access
+    def oldcodes(self): 
+        if request.method == 'POST':
+            print('request FORM', request.form)
+            print('we have it! POOOOST', request.files)
+            # check if the post request has the file part
+            
+            if 'file' not in request.files:
+                flash('No file part')
+                print('we have a problem with THE FORM !')
+                return redirect(request.url)
+            
+            
+            #file = request.files['file[]']
+            files = request.files
+            print('file is type of:', type(files))
+            if isinstance(files, ImmutableMultiDict):
+                print('is an ImmutableMultiDICT ! ****')
+                print('WE HAVE FILES !!', files)
+                # if user does not select file, browser also
+                # submit a empty part without filename
+                filename_list = []
+                files = dict(files)
+                reserved_list = []
+                updated_list = []
+                print('lunghezza files: ', len(files['file']))
+                files = files['file']
+                print('Files afteer DICT',files)
+                for file in files:
+                    #file = file[0]
+                    print('type of row', type(file), file)
+                    if file.filename == '':
+                        flash('No selected file')
+                        return redirect(request.url)
+                    
+                    if file and allowed_file(file.filename):
+                        print('IS ALLOWED FILE !!')
+                        filename = secure_filename(file.filename)
+                        filename_list.append(filename)
+                        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                        res_list, upd_list = old_codes_update(self, file)
+                        for item in res_list:
+                            flash('WARNING: '+ str(item[1])+'is already reserved by '+ str(item[2]), category='warning')
+                        reserved_list += res_list
+                        updated_list += upd_list
+                        
+                        print('reserdev list:', reserved_list)
+                        print('updated list:', updated_list)
+                        self.update_redirect()
+                
+                flash('Update: '+ str(len(files)) +' files processed, '+ str(len(updated_list))+' total codes updated.', category='info')
+                return self.render_template('oldcodes.html',
+                                            filename=filename_list,
+                                            updated_list=updated_list,
+                                            count_updated=len(updated_list),
+                                            reserved_list=reserved_list,
+                                            count_reserved=len(reserved_list))
+            '''
+                return redirect(url_for('Uploadcodes.upload',
+                                        filename=filename_list,
+                                        updated_list=updated_list,
+                                        count_updated=len(updated_list),
+                                        reserved_list=reserved_list,
+                                        count_reserved=len(reserved_list)))
+            '''
+        return self.render_template('oldcodes.html')
+
 
 class Uploadcodes(BaseView):
     
@@ -899,6 +972,7 @@ class Uploadcodes(BaseView):
             '''
         return self.render_template('upload_status.html')
 
+
 class CommentsView(ModelView):
     datamodel = SQLAInterface(Comments)
 
@@ -914,6 +988,11 @@ db.create_all()
 appbuilder.add_view(CommentsView, "Comments",
                     icon="fa-paper-plane", category="Update Bapco",
                     category_icon='fa-bold')
+
+appbuilder.add_view(Oldcodes, "Old Codes Upload",
+                    icon="fa-paper-plane", category="Update Bapco",
+                    category_icon='fa-bold')
+
 
 appbuilder.add_view(Uploadcodes, "Update from XLSX",
                     icon="fa-paper-plane", category="Update Bapco",

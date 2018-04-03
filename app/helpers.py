@@ -3,12 +3,12 @@ from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask import flash, send_file, make_response, redirect, url_for
 
 from .models import (Matrix, Document, Unit, Materialclass, Doctype, Partner,
-                     Cdrlitem, Documentclass, Mr, Vendor)
+                     Cdrlitem, Documentclass, Mr, Vendor, DocRequests)
 #from .views import send_csv
 import csv, xlsxwriter
 from werkzeug.utils import secure_filename
 import uuid
-import openpyxl
+import openpyxl, os
 
 
 
@@ -396,3 +396,47 @@ def setting_update(file):
             reserved_list.append([my_class.id, my_class.name, my_class.description])
 
     return reserved_list, updated_list
+
+def old_codes_update(self, file):
+    book = openpyxl.load_workbook(file)
+    sheet = book.active
+    #header = sheet['A1':'M1']
+    '''
+    unit = header[0][0].value
+    materialclass = header[0][1].value
+    doctype = header[0][2].value
+    bapco_code = header[0][5].value
+    description = header[0][6].value
+    oldcode = header[0][7].value
+    cdrlitem = header[0][8].value
+    documentclass =header[0][9].value
+    note = header[0][10].value
+    trasmittal = header[0][11].value
+    '''
+    session = db.session
+    datamodel = SQLAInterface(DocRequests, session=session)
+
+    for row in sheet.iter_rows(min_row=2):
+        req = DocRequests()
+        req.quantity = 1
+        req.unit = Unit(unit=row[0].value) 
+        req.materialclass = Materialclass(materialclass=row[1].value) 
+        req.doctype = Doctype(doctype=row[2].value) 
+        req.cdrlitem = Cdrlitem(cdrlitem=row[8].value) 
+        req.documentclass = Documentclass(documentclass=row[9].value) 
+        req.partner = Partner(partner=row[12].value) 
+        #req.oldcode = row[7].value
+        print('search for Unit:', req.unit.unit)
+        #code = bapco(self, req)
+        #row[14] = code
+        datamodel.add(req)
+        
+    reserved_list = ['coming soon...']
+    updated_list = ['coming soon...']
+    book.close()
+    return reserved_list, updated_list
+
+xls = open('bapco_codes.xlsx','rb')
+
+        
+        
