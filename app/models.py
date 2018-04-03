@@ -21,7 +21,7 @@ class Unit(Model):
     __tablename__ = "unit"
     id = Column(Integer, primary_key=True)
     unit = Column(String(3), unique=True, nullable=False)
-    name = Column(String(35))
+    name = Column(String(100))
     start = Column(Integer, default=0)
     stop = Column(Integer)
     unit_type = Column(String(20), default='standard') 
@@ -34,7 +34,7 @@ class Materialclass(Model):
     __tablename__ = "materialclass"
     id = Column(Integer, primary_key=True)
     materialclass = Column(String(1), unique=True, nullable=False)
-    name = Column(String(35))
+    name = Column(String(100))
     description = Column(String(100))
 
     def __repr__(self):
@@ -44,7 +44,7 @@ class Doctype(Model):
     __tablename__ = "doctype"
     id = Column(Integer, primary_key=True)
     doctype = Column(String(3), unique=True, nullable=False)
-    name = Column(String(35))
+    name = Column(String(100))
     description = Column(String(100))
     
     def __repr__(self):
@@ -53,8 +53,8 @@ class Doctype(Model):
 class Partner(Model):
     __tablename__ = "partner"
     id = Column(Integer, primary_key=True)
-    partner = Column(String(20), unique=True, nullable=False)
-    name = Column(String(35))
+    partner = Column(String(50), unique=True, nullable=False)
+    name = Column(String(100))
     description = Column(String(100))
     common_start = Column(Integer, default=0)
     common_stop = Column(Integer, default=0)
@@ -66,8 +66,8 @@ class Partner(Model):
 class Documentclass(Model):
     __tablename__ = "documentclass"
     id = Column(Integer, primary_key=True)
-    documentclass = Column(String(35), unique=True, nullable=False)
-    name = Column(String(35))
+    documentclass = Column(String(1), unique=True, nullable=False)
+    name = Column(String(100))
     description = Column(String(100))
 
     def __repr__(self):
@@ -78,7 +78,7 @@ class Cdrlitem(Model):
     __tablename__ = "cdrlitem"
     id = Column(Integer, primary_key=True)
     cdrlitem = Column(String(35), unique=True, nullable=False)
-    name = Column(String(35))
+    name = Column(String(100))
     description = Column(String(100))
 
     def __repr__(self):
@@ -88,8 +88,8 @@ class Cdrlitem(Model):
 class Vendor(Model):
     __tablename__ = "vendor"
     id = Column(Integer, primary_key=True)
-    vendor = Column(String(35), unique=True, nullable=False)
-    name = Column(String(35))
+    vendor = Column(String(50), unique=True, nullable=False)
+    name = Column(String(100))
     description = Column(String(100))
 
     def __repr__(self):
@@ -99,8 +99,8 @@ class Vendor(Model):
 class Mr(Model):
     __tablename__ = "mr"
     id = Column(Integer, primary_key=True)
-    mr = Column(String(35), unique=True, nullable=False)
-    name = Column(String(35))
+    mr = Column(String(50), unique=True, nullable=False)
+    name = Column(String(100))
     description = Column(String(100))
 
     def __repr__(self):
@@ -110,7 +110,7 @@ class Mr(Model):
 class Matrix(Model):
     __tablename__ = "matrix"
     id = Column(Integer, primary_key=True)
-    matrix = Column(String(20))
+    matrix = Column(String(50))
     counter = Column(Integer, default=1)
     document_id = Column(Integer, ForeignKey("document.id"))
     document = relationship('Document')

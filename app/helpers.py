@@ -133,25 +133,34 @@ def bapco(self, item):
         print('Match unit type common Found')
 
         # Add the partner id to the matrix
-        item_matrix = str.join('-', (item.unit.unit,
-                                     item.materialclass.materialclass,
-                                     item.doctype.doctype,
+        item_matrix = str.join('-', (str(item.unit),
+                                     str(item.materialclass),
+                                     str(item.doctype),
                                      # item.sheet,
-                                     item.partner.partner))
+                                     str(item.partner)
+                                     ))
     else:
-        item_matrix = str.join('-', (item.unit.unit,
-                                        item.materialclass.materialclass,
-                                        item.doctype.doctype,
-                                        # item.sheet,
-                                        ))
+        item_matrix = str.join('-', (str(item.unit),
+                                     str(item.materialclass),
+                                     str(item.doctype),
+                                     # item.sheet,
+                                     ))
     # Set the bapco base code
-    item_serial = str.join('-', (item.unit.unit,
-                                    item.materialclass.materialclass,
-                                    item.doctype.doctype,
-                                    # item.sheet,
-                                    ))
+    item_serial = str.join('-', (str(item.unit),
+                                 str(item.materialclass),
+                                 str(item.doctype),
+                                 # item.sheet,
+                                 ))
     
     # Increment the Matrix counter or create a new one
+    print('Matrix to search:', 
+    (str(item.unit),
+                                     str(item.materialclass),
+                                     str(item.doctype),
+                                     # item.sheet,
+                                     str(item.partner)
+                                     )
+    )
     matrix = db.session.query(Matrix).filter(Matrix.matrix == item_matrix).first()
     if matrix:
         matrix.counter += 1
@@ -170,6 +179,8 @@ def bapco(self, item):
     else:
         # Create a New Matrix for common units
         if result.unit_type == 'common':
+
+            print('item partner to find: ', item.partner)
             
             partner = db.session.query(Partner).filter(Partner.partner == str(item.partner)).first()
            
@@ -180,7 +191,9 @@ def bapco(self, item):
 
             # Add new Doc with quantity partner common start + 1
             datamodel = SQLAInterface(Document, session=session)
+            
             code = item_serial + "-" + str(partner.common_start + 1).zfill(5) + "-" + item.sheet
+            
             doc = Document(docrequests_id=item.id, code=code)
             datamodel.add(doc)
             message = 'Your code is ' + code
@@ -436,7 +449,128 @@ def old_codes_update(self, file):
     book.close()
     return reserved_list, updated_list
 
-xls = open('bapco_codes.xlsx','rb')
+#xls = open('bapco_codes.xlsx','rb')
+def old_codes(self, file):
+    book = openpyxl.load_workbook(file)
+    sheet = book.active
+    session = db.session
+    # Create the datamodel
+    datamodel_unit = SQLAInterface(Unit, session=session)
+    datamodel_mat = SQLAInterface(Materialclass, session=session)
+    datamodel_doctype = SQLAInterface(Doctype, session=session)
+    datamodel_cdrlitem = SQLAInterface(Cdrlitem, session=session)
+    datamodel_documentclass = SQLAInterface(Documentclass, session=session)
+    datamodel_partner = SQLAInterface(Partner, session=session)
+    
+    
+    
+    found_list = []
+    not_found_list = []
+    for row in sheet.iter_rows(min_row=2):
+        check = True
+        datamodel = SQLAInterface(DocRequests, session=session)
+        req = DocRequests()
+       
+        # Unit Query
+        if row[0].value:
+            try:
+                unit_id = session.query(Unit).filter(Unit.unit == row[0].value).first()
+                req.unit_id = unit_id.id
+                req.unit = unit_id.unit
+                #req.unit.unit = unit_id.unit
+                
+                if unit_id.unit_type == '000':
+                    req.unit_type = 'common'
 
+                found_list.append(['Unit', req.unit_id, row[0].value])
+            except:
+                check = False
+                not_found_list.append(['bapco: '+row[5].value+' for '+row[7].value,'Unit Not Found',row[0].value ])
+
+        # Materialclass Query
+        if row[1].value:
+            try:
+                mat_id = session.query(Materialclass).filter(Materialclass.materialclass == row[1].value).first()
+                req.materialclass_id = mat_id.id
+                req.materialclass = mat_id.materialclass
+                found_list.append(['Materialclass', req.materialclass_id, row[1].value])
+            except:
+                check = False
+                not_found_list.append(['bapco: '+row[5].value+' for '+row[7].value,'Material class Not Found',row[1].value ])
+        
+        # Doctype Query
+        if row[2].value:
+            try:
+                doc_id = session.query(Doctype).filter(Doctype.doctype == row[2].value).first()
+                req.doctype_id = doc_id.id
+                req.doctype = doc_id.doctype
+                found_list.append(['Doctype', req.doctype_id, row[2].value])
+            except:
+                check = False
+                not_found_list.append(['bapco: '+row[5].value+' for '+row[7].value,'Doctype Not Found',row[2].value ])
+
+        # CdrlItem Query
+        if row[8].value:
+            try:
+                cdrl_id = session.query(Cdrlitem).filter(Cdrlitem.cdrlitem == row[8].value).first()
+                req.cdrlitem_id = cdrl_id.id
+                req.cdrlitem = cdrl_id.cdrlitem
+                found_list.append(['Cdrlitem', req.cdrlitem_id, row[8].value])
+            except:
+                #check = False
+                not_found_list.append(['bapco: '+row[5].value+' for '+row[7].value,'Cdrl Not Found',row[8].value ])
+        
+        # Documentclass Query
+        if row[9].value:
+            try:
+                dc_id = session.query(Documentclass).filter(Documentclass.documentclass == row[9].value).first()
+                req.documentclass_id = dc_id.id
+                req.documentclass = dc_id.documentclass
+                found_list.append(['Documentclass', req.documentclass_id, row[9].value])
+            except:
+                #check = False
+                not_found_list.append(['bapco: '+row[5].value+' for '+row[7].value,'Document class Not Found',row[9].value ])
+
+        # Partner Query
+        if row[12].value:
+            try:
+                
+                pa_id = session.query(Partner).filter(Partner.partner == row[12].value).first()
+                req.partner_id = pa_id.id
+                req.partner = pa_id.partner
+                found_list.append(['Partner', req.partner_id, row[12].value])
+            except:
+                check = False
+                not_found_list.append(['bapco: '+row[5].value+' for '+row[7].value,'Partner Not Found', row[12].value ])
+        
+        # Add Sheet 001
+        req.sheet = '001'
+        #
+        # ADD Request
+        #
         
         
+        if check is True:
+            code = bapco(self, req)
+            print('Added DocRequstest:', req.unit_id, req.materialclass_id, req.doctype_id,
+                    req.cdrlitem_id, req.documentclass_id, req.partner_id)
+            print('Ask Bapco:', code, ' Your Bapco Code: ',row[5].value, 'Your Code: ', row[7].value )
+
+            
+        else:
+            print('Not Added DocRequstest:', req.unit_id, req.materialclass_id, req.doctype_id,
+                    req.cdrlitem_id, req.documentclass_id, req.partner_id)
+            print('Wrong Request: ',row[0].value,row[1].value,row[2].value,row[8].value,row[9].value,row[12].value )
+
+
+
+    '''
+    print('Found List')
+    for i in found_list:
+        print(i[0],i[1], i[2])
+    
+    print('NOT Found List')
+    for i in not_found_list:
+        print(i[0],i[1], i[2])
+    '''
+    return not_found_list, found_list

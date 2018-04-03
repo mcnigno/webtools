@@ -21,7 +21,7 @@ from flask_babel import gettext
 from flask_appbuilder import BaseView, expose, has_access
 
 from wtforms.validators import DataRequired, InputRequired
-from .helpers import adddoc3, bapco, tocsv, toxlsx, codes_to_xlsx, update_from_xlsx, setting_update, old_codes_update
+from .helpers import adddoc3, bapco, tocsv, toxlsx, codes_to_xlsx, update_from_xlsx, setting_update, old_codes_update, old_codes
 import csv
 from app import app
 from flask_appbuilder.actions import action
@@ -793,7 +793,7 @@ class Oldcodes(BaseView):
                 print('Files afteer DICT',files)
                 for file in files:
                     #file = file[0]
-                    print('type of row', type(file), file)
+                    #print('type of row', type(file), file)
                     if file.filename == '':
                         flash('No selected file')
                         return redirect(request.url)
@@ -803,17 +803,17 @@ class Oldcodes(BaseView):
                         filename = secure_filename(file.filename)
                         filename_list.append(filename)
                         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                        res_list, upd_list = old_codes_update(self, file)
-                        for item in res_list:
-                            flash('WARNING: '+ str(item[1])+'is already reserved by '+ str(item[2]), category='warning')
+                        res_list, upd_list = old_codes(self, file)
+                        #for item in res_list:
+                            #flash('WARNING: '+ str(item[1])+'is already reserved by '+ str(item[2]), category='warning')
                         reserved_list += res_list
                         updated_list += upd_list
                         
-                        print('reserdev list:', reserved_list)
-                        print('updated list:', updated_list)
+                        #print('reserdev list:', reserved_list)
+                        #print('updated list:', updated_list)
                         self.update_redirect()
                 
-                flash('Update: '+ str(len(files)) +' files processed, '+ str(len(updated_list))+' total codes updated.', category='info')
+                #flash('Update: '+ str(len(files)) +' files processed, '+ str(len(updated_list))+' total codes updated.', category='info')
                 return self.render_template('oldcodes.html',
                                             filename=filename_list,
                                             updated_list=updated_list,
