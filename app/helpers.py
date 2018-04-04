@@ -455,14 +455,11 @@ def old_codes(self, file):
     sheet = book.active
     session = db.session
     # Create the datamodel
-    datamodel_unit = SQLAInterface(Unit, session=session)
-    datamodel_mat = SQLAInterface(Materialclass, session=session)
-    datamodel_doctype = SQLAInterface(Doctype, session=session)
-    datamodel_cdrlitem = SQLAInterface(Cdrlitem, session=session)
-    datamodel_documentclass = SQLAInterface(Documentclass, session=session)
-    datamodel_partner = SQLAInterface(Partner, session=session)
+    datamodel = SQLAInterface(DocRequests, session=session)
+    first_req = DocRequests(unit=Unit(unit='QSR'), materialclass=Materialclass(materialclass='1'), doctype=Doctype(doctype='QSR'), partner=Partner(partner='QSR'))
+    datamodel.add(first_req)
     
-    
+
     
     found_list = []
     not_found_list = []
@@ -470,6 +467,7 @@ def old_codes(self, file):
         check = True
         datamodel = SQLAInterface(DocRequests, session=session)
         req = DocRequests()
+        #req.id = 1
        
         # Unit Query
         if row[0].value:
@@ -546,9 +544,15 @@ def old_codes(self, file):
         # Add Sheet 001
         req.sheet = '001'
         #
-        # ADD Request
+        # 
+        # ADD the first Request with id = 1
         #
-        
+        '''
+        datamodel = SQLAInterface(DocRequests, session=session)
+        first_req = DocRequests(unit='001', materialclass='A', doctype='HDD', partner='QSR')
+        datamodel.add(first_req)
+        req.id = 1
+        '''
         
         if check is True:
             code = bapco(self, req)
