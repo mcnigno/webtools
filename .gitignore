@@ -135,3 +135,4 @@ app.db
 #csv folder
 
 app/static/csv/
+*.xlsx
