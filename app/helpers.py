@@ -556,6 +556,10 @@ def old_codes(self, file):
         
         if check is True:
             code = bapco(self, req)
+            ask_bapco_code = row[13].value
+            row[13].value = code
+            
+            
             print('Added DocRequstest:', req.unit_id, req.materialclass_id, req.doctype_id,
                     req.cdrlitem_id, req.documentclass_id, req.partner_id)
             print('Ask Bapco:', code, ' Your Bapco Code: ',row[5].value, 'Your Code: ', row[7].value )
@@ -565,7 +569,8 @@ def old_codes(self, file):
             print('Not Added DocRequstest:', req.unit_id, req.materialclass_id, req.doctype_id,
                     req.cdrlitem_id, req.documentclass_id, req.partner_id)
             print('Wrong Request: ',row[0].value,row[1].value,row[2].value,row[8].value,row[9].value,row[12].value )
-
+    
+    book.save('upload_results.xlsx')
 
 
     '''

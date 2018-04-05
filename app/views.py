@@ -531,8 +531,8 @@ class DoctypeView(ModelView):
 
 class PartnerView(ModelView):
     datamodel = SQLAInterface(Partner)
-    #list_columns = ['partner', 'description']
-    # list_widget = ListThumbnail
+    list_columns = ['partner','common_start','common_stop', 'description']
+    list_widget = ListThumbnail
 
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
     def muldelete(self, items):
