@@ -562,7 +562,9 @@ def old_codes(self, file):
             
             print('Added DocRequstest:', req.unit_id, req.materialclass_id, req.doctype_id,
                     req.cdrlitem_id, req.documentclass_id, req.partner_id)
-            print('Ask Bapco:', code, ' Your Bapco Code: ',row[5].value, 'Your Code: ', row[7].value )
+            print('Ask Bapco:', code)
+            print(' Your Bapco Code: ',row[5].value)
+            print('Your Code: ',row[7].value )
 
             
         else:
