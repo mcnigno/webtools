@@ -803,7 +803,7 @@ class Oldcodes(BaseView):
                         filename = secure_filename(file.filename)
                         filename_list.append(filename)
                         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                        res_list, upd_list = old_codes(self, file)
+                        res_list, upd_list, result_file = old_codes(self, file)
                         #for item in res_list:
                             #flash('WARNING: '+ str(item[1])+'is already reserved by '+ str(item[2]), category='warning')
                         reserved_list += res_list
@@ -819,7 +819,9 @@ class Oldcodes(BaseView):
                                             updated_list=updated_list,
                                             count_updated=len(updated_list),
                                             reserved_list=reserved_list,
-                                            count_reserved=len(reserved_list))
+                                            count_reserved=len(reserved_list),
+                                            result_file=result_file
+                                            )
             '''
                 return redirect(url_for('Uploadcodes.upload',
                                         filename=filename_list,

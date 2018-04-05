@@ -149,7 +149,7 @@ class DocRequests(AuditMixin, Model):
         doc_param = "-".join([str(x) for x in [self.unit, self.materialclass, self.doctype]])
 
         return '[ '+ str(self.quantity) +' ] '+ doc_param + ' by ' + str(self.created_by) +' on ' + str(self.created())
-    
+
     # def __init__(self):
     def csv(self):
         return Markup('<a href="/static/csv/bapco_request_'+ str(self.id) +'.xlsx" download>'+'<img border="0" src="/static/img/excel.png" alt="W3Schools" width="24" height="24">'+'</a>')
@@ -158,7 +158,7 @@ class DocRequests(AuditMixin, Model):
         date = self.created_on
         return date.strftime('We are the %d, %b %Y')
         return self.created_on.strftime('%d, %b %Y - %H:%M:%S')
-    
+
     def modified(self):
         date = self.created_on
         #return date.strftime('We are the %d, %b %Y')
