@@ -1,7 +1,7 @@
 import os
 from flask_appbuilder.security.manager import AUTH_OID, AUTH_REMOTE_USER, AUTH_DB, AUTH_LDAP, AUTH_OAUTH
 basedir = os.path.abspath(os.path.dirname(__file__))
-
+    
 # Your App secret key
 SECRET_KEY = '\2\1thisismyscretkey\1\2\e\y\y\h'
 
@@ -21,7 +21,7 @@ APP_NAME = "Quasar PM [ BAPCO DCC Encoding ]"
 #APP_NAME = "Q"
 
 # Uncomment to setup Setup an App icon 
-#APP_ICON = "/static/img/logo_q.png"
+APP_ICON = "/static/img/logo_quasar_white.png"
 
 #----------------------------------------------------
 # AUTHENTICATION CONFIG

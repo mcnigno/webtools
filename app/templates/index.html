@@ -1,38 +1,63 @@
 {% extends "appbuilder/base.html" %}
 {% block content %}
-<div class="jumbotron" style="background-color:darkgrey; color:darkred">
-  <div class="container" style="text-align:center;">
+<script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js" integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl" crossorigin="anonymous"></script>
 
-    <h1 style="color:white">{{_("ASK ")}}<img border="0" src="/static/img/Bapco_logo350x138.png" alt="W3Schools" width="200"></h2>
-    <h4 style="color:black">{{_("DOCUMENT ENCODE ENGINE by Quasar ")}}</h3>
+<div class="jumbotron row">
+    
+  
+    <div class="col-md-6" style="text-align:left; vertical-align:top">
+        
+            
+            <h3><span style="color:red"><i class="fas fa-pulse fa-spinner"></i></span><span style="color:white">&nbsp ASK BAPCO </span>PROJECT</h3>
+              
+            <p>&nbsp&nbsp&nbsp&nbsp&nbsp Document Enocoding Engine</p>
+            <p>&nbsp&nbsp&nbsp&nbsp&nbsp powered by <strong>Quasar</strong></p>
+            
+            
+          
+    </div> 
+       
+    
+    <div class="col-md-6" style="text-align:right";>
+        
+        
+  
+            <h3><a href="/docrequestsview/list/"><img border="0" src="/static/img/logo_technipfmc_w.png" alt="W3Schools" class="center" width="70%" height="70%"></a></h3>
+
+            <!--<p>{{_("In this area you can also list, add, edit, delete and export bapco's codes. Functionalities and permissions are based on you role.  ")}}</p>-->
+            <!--<a class="btn btn-primary" href="#" role="button">Vendor Code</a>-->
+        
+    </div>
+</div>
+<div class="jumbotron row" style="text-align:center;">
+    
+  
+    <div class="col-md-6" >
+        
+            <p><a href="/docrequestsview/list/"><img border="0" src="/static/img/engineering.png" alt="W3Schools" width="64" height="64"> {{_("ENGINEERING")}}</a></p>
+            <p>{{_("Ask for your engineering codes.")}}</p>
+            <!-- <p>{{_("In this area you can also list, add, edit, delete and export bapco's codes. Functionalities and permissions are based on you role.  ")}}</p>-->
+            <!--<a class="btn btn-primary" href="/docrequestsview/list/" role="button">Engineering Code</a>-->
+          
+    </div> 
+       
+    
+    <div class="col-md-6">
+        
+        
+  
+            <p><a href="/docrequestsview/list/"><img border="0" src="/static/img/vendor.png" href="/docrequestsview/list/" alt="W3Schools" width="64" height="64"> {{_("VENDOR")}}</a></p>
+            <p>{{_("Ask for your vendor codes.")}}</p>
+            <!--<p>{{_("In this area you can also list, add, edit, delete and export bapco's codes. Functionalities and permissions are based on you role.  ")}}</p>-->
+            <!--<a class="btn btn-primary" href="#" role="button">Vendor Code</a>-->
+        
+    </div>
     
   </div>
-</div>
+      
+ 
 
-<div class="row jumbotron" style="text-align:center;">
-  <div class="col-md-6 container" >
-      
-          <h2><img border="0" src="/static/img/engineering.png" alt="W3Schools" width="64" height="64"> {{_("ENGINEERING")}}</h2>
-          <h3>{{_("Generate your engineering codes.")}}</h3>
-          <p>{{_("In this area you can also list, add, edit, delete and export bapco's codes. Functionalities and permissions are based on you role.  ")}}</p>
-          <a class="btn btn-primary" href="/docrequestsview/list/" role="button">Engineering Code</a>
-        
-      </div> 
-     
-  
-  <div class="col-md-6 container">
-      
-      
-
-          <h2><img border="0" src="/static/img/vendor.png" alt="W3Schools" width="64" height="64"> {{_("VENDOR")}}</h2>
-          <h3>{{_("Generate your vendor codes.")}}</h3>
-          <p>{{_("In this area you can also list, add, edit, delete and export bapco's codes. Functionalities and permissions are based on you role.  ")}}</p>
-          <a class="btn btn-primary" href="#" role="button">Vendor Code</a>
-      
-      </div>
-  
-</div>
-
+<!--
 
 <div class="jumbotron" style="text-align:center">
   <div class="container">
@@ -69,4 +94,5 @@
     </script>
   </div>
 </div>
+-->
 {% endblock %}

@@ -16,7 +16,7 @@ AuditMixin will add automatic timestamp of created and modified by who
 def mydefault():
     print('by mydefaul function')
     return 'func'
-
+    
 class Unit(Model):
     __tablename__ = "unit"
     id = Column(Integer, primary_key=True)
@@ -39,7 +39,7 @@ class Materialclass(Model):
 
     def __repr__(self):
         return self.materialclass 
-
+    
 class Doctype(Model):
     __tablename__ = "doctype"
     id = Column(Integer, primary_key=True)
@@ -148,8 +148,8 @@ class DocRequests(AuditMixin, Model):
     def __repr__(self):
         doc_param = "-".join([str(x) for x in [self.unit, self.materialclass, self.doctype]])
 
-        return '[ '+ str(self.quantity) +' ] '+ doc_param + ' by ' + str(self.created_by) +' on ' + str(self.created())
-
+        return '[ '+ str(self.quantity) +' ] '+ doc_param + ' by ' + str(self.created_by) + ' on ' + str(self.created())
+    
     # def __init__(self):
     def csv(self):
         return Markup('<a href="/static/csv/bapco_request_'+ str(self.id) +'.xlsx" download>'+'<img border="0" src="/static/img/excel.png" alt="W3Schools" width="24" height="24">'+'</a>')

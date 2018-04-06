@@ -273,6 +273,7 @@ def toxlsx(self, item,  codes_list):
     for code in (t_list):
         #print('Looping colist', code, row)
         worksheet.write(row, col, str(code[0]))
+        worksheet.write(row, col)
         row += 1
     workbook.close()
 
@@ -372,7 +373,7 @@ def setting_update(file):
         my_class = db.session.query(tmp_class).filter(tmp_param == str(param)).first()
         
         datamodel = SQLAInterface(tmp_class, session=session)
-        
+    
         if my_class:
             print(my_class)
             my_class.name = name
