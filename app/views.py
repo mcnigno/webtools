@@ -30,6 +30,7 @@ from flask import request
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import ImmutableMultiDict
 import os
+from flask_appbuilder.security.sqla.models import User
 
 ALLOWED_EXTENSIONS = set(['xlsx'])
 
@@ -627,17 +628,28 @@ class MultipleViewsExp(MultipleView):
     views = [UnitView, MaterialclassView, DoctypeView, PartnerView]
     list_widget = ListBlock
 
+def pretty_user(user):
+    
+    return 'some text'
 
 class EncodChartView(GroupByChartView):
     datamodel = SQLAInterface(DocRequests)
     chart_title = 'Grouped Encod'
     label_columns = UnitView.label_columns
-    chart_type = 'PieChart'
+    #chart_type = 'PieChart'
 
     definitions = [
         {
+            'label': 'some label',
             'group': 'unit_id',
             'series': [(aggregate_count, 'unit_id')]
+        },
+        {
+            'group': 'created_by_fk',
+            'series': [(aggregate_count, 'pretty_user'),
+                       (aggregate_count, 'unit'),
+                       (aggregate_count, 'materialclass')
+                       ]
         }
     ]
 
@@ -1075,8 +1087,8 @@ appbuilder.add_view(MatrixView, "Matrix View",
 appbuilder.add_view(GroupMasterView, "GroupMasterView ",
                     icon="fa-folder-open-o", category="Ask Bapco",
                     category_icon='fa-envelope')
-appbuilder.add_view(EncodChartView, "EncodChartView ",
+'''
+appbuilder.add_view(EncodChartView, "EncoChartView ",
                     icon="fa-folder-open-o", category="Bapco Resources",
                     category_icon='fa-envelope')
 
-'''

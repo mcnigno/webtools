@@ -5,6 +5,8 @@ from sqlalchemy.orm import relationship
 from time import gmtime, strftime
 from flask import Markup
 from .momentjs import momentjs
+from flask_babel import lazy_gettext as _
+
 
 """
 
@@ -156,10 +158,15 @@ class DocRequests(AuditMixin, Model):
         return Markup('<a href="/static/csv/bapco_request_'+ str(self.id) +'.xlsx" download>'+'<img border="0" src="/static/img/excel.png" alt="W3Schools" width="24" height="24">'+'</a>')
         
     def created(self):
-        date = self.created_on
+        #date = self.created_on
         #return date.strftime('We are the %d, %b %Y')
-        return Markup(momentjs(date).calendar())
+        return Markup(_(momentjs(self.created_on).calendar() + ' | ' + momentjs(self.created_on).fromNow()))
         #return self.created_on.strftime('%d, %b %Y - %H:%M:%S')
+    
+    def user_create(self):
+        username = self.user_create()
+         
+        return username
 
     def modified(self):
         date = self.created_on
@@ -219,8 +226,9 @@ class Document(AuditMixin, Model):
     def created(self):
         date = self.created_on
         #return date.strftime('We are the %d, %b %Y')
-        return momentjs(date).calendar() 
-        return self.created_on.strftime('%d, %b %Y - %H:%M:%S')
+        
+        return Markup(_(momentjs(self.created_on).calendar() + ' | ' + momentjs(self.created_on).fromNow()))
+        #return self.created_on.strftime('%d, %b %Y - %H:%M:%S')
     
     def modified(self):
         #date = self.created_on
