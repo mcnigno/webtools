@@ -4,6 +4,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from time import gmtime, strftime
 from flask import Markup
+from .momentjs import momentjs
 
 """
 
@@ -39,7 +40,7 @@ class Materialclass(Model):
 
     def __repr__(self):
         return self.materialclass 
-
+    
 class Doctype(Model):
     __tablename__ = "doctype"
     id = Column(Integer, primary_key=True)
@@ -148,7 +149,7 @@ class DocRequests(AuditMixin, Model):
     def __repr__(self):
         doc_param = "-".join([str(x) for x in [self.unit, self.materialclass, self.doctype]])
 
-        return '[ '+ str(self.quantity) +' ] '+ doc_param + ' by ' + str(self.created_by) +' on ' + str(self.created())
+        return '[ '+ str(self.quantity) +' ] '+ doc_param + ' by ' + str(self.created_by) + ' on ' + str(self.created())
     
     # def __init__(self):
     def csv(self):
@@ -156,9 +157,10 @@ class DocRequests(AuditMixin, Model):
         
     def created(self):
         date = self.created_on
-        return date.strftime('We are the %d, %b %Y')
+        #return date.strftime('We are the %d, %b %Y')
+        #return Markup(momentjs(date).calendar())
         return self.created_on.strftime('%d, %b %Y - %H:%M:%S')
-    
+
     def modified(self):
         date = self.created_on
         #return date.strftime('We are the %d, %b %Y')
@@ -215,8 +217,9 @@ class Document(AuditMixin, Model):
         return self.docrequests.req_type()
 
     def created(self):
-        #date = self.created_on
+        date = self.created_on
         #return date.strftime('We are the %d, %b %Y')
+        return momentjs(date).calendar() 
         return self.created_on.strftime('%d, %b %Y - %H:%M:%S')
     
     def modified(self):

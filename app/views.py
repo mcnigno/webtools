@@ -167,8 +167,6 @@ def adddoc2(self, item):
     db.session.flush()
 
 
-
-
 def get_pending():
     return 'reserved'
 '''
@@ -220,7 +218,6 @@ class PendingView(ModelView):
         redirect(self.get_redirect())
         #self.update_redirect()
         return send_file('static/csv/' + filename, as_attachment=True)
-
 
 
 class DocumentView(CompactCRUDMixin, ModelView):
@@ -294,6 +291,10 @@ class VendorRequestsView(ModelView):
         'request_type': 'Type',
         'csv': 'XLS'
     }
+    
+    related_views = [DocumentView]
+    show_template = 'appbuilder/general/model/show_cascade.html'
+    edit_template = 'appbuilder/general/model/edit_cascade.html'
 
     base_order = ('id', 'desc')
     
@@ -379,8 +380,6 @@ class VendorRequestsView(ModelView):
             print(code)
             print('SESSION LIST:', session_list)
         toxlsx(self, item, session_list)
-        
-
 
 
 # Engineering Form Request
@@ -403,6 +402,9 @@ class DocRequestsView(ModelView):
                     ['request_type', FilterEqual, 'engineering']
                     ]
     base_permissions = ['can_add','can_list','can_show'] 
+    related_views = [DocumentView]
+    show_template = 'appbuilder/general/model/show_cascade.html'
+    edit_template = 'appbuilder/general/model/edit_cascade.html'
 
     list_title = 'Engineering Code Request'
     add_title = 'Add Engineering Code Request'
@@ -516,6 +518,7 @@ class MaterialclassView(ModelView):
             self.datamodel.delete(items)
         return redirect(self.get_redirect())
 
+
 class DoctypeView(ModelView):
     datamodel = SQLAInterface(Doctype)
     list_columns = ['doctype', 'name', 'description']
@@ -528,6 +531,7 @@ class DoctypeView(ModelView):
         else:
             self.datamodel.delete(items)
         return redirect(self.get_redirect())
+
 
 class PartnerView(ModelView):
     datamodel = SQLAInterface(Partner)
@@ -542,6 +546,7 @@ class PartnerView(ModelView):
         else:
             self.datamodel.delete(items)
         return redirect(self.get_redirect())
+
 
 class CdrlitemView(ModelView):
     datamodel = SQLAInterface(Cdrlitem)
@@ -598,6 +603,7 @@ class MrView(ModelView):
             self.datamodel.delete(items)
         return redirect(self.get_redirect())
 
+
 class MatrixView(ModelView):
     datamodel = SQLAInterface(Matrix)
     list_columns = ['id', 'matrix', 'counter']
@@ -615,6 +621,7 @@ class GroupMasterView(MasterDetailView):
         else:
             self.datamodel.delete(items)
         return redirect(self.get_redirect())
+
 
 class MultipleViewsExp(MultipleView):
     views = [UnitView, MaterialclassView, DoctypeView, PartnerView]
@@ -646,7 +653,12 @@ class ListRequest(ModelView):
     edit_title = 'Modifica Richiesta Codifica'
     show_title = 'Vista Richiesta Codifica'
     related_views = [DocumentView]
+
+    show_template = 'appbuilder/general/model/show_cascade.html'
+    edit_template = 'appbuilder/general/model/edit_cascade.html'
+    
     #list_widget = ListThumbnail
+
     title = "Bapco Document ID Generator"
     label_columns = {
         'csv': 'XLS',
@@ -803,7 +815,7 @@ class Oldcodes(BaseView):
                         filename = secure_filename(file.filename)
                         filename_list.append(filename)
                         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                        res_list, upd_list = old_codes(self, file)
+                        res_list, upd_list, result_file = old_codes(self, file)
                         #for item in res_list:
                             #flash('WARNING: '+ str(item[1])+'is already reserved by '+ str(item[2]), category='warning')
                         reserved_list += res_list
@@ -819,7 +831,9 @@ class Oldcodes(BaseView):
                                             updated_list=updated_list,
                                             count_updated=len(updated_list),
                                             reserved_list=reserved_list,
-                                            count_reserved=len(reserved_list))
+                                            count_reserved=len(reserved_list),
+                                            result_file=result_file
+                                            )
             '''
                 return redirect(url_for('Uploadcodes.upload',
                                         filename=filename_list,

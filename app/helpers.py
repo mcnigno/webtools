@@ -273,6 +273,7 @@ def toxlsx(self, item,  codes_list):
     for code in (t_list):
         #print('Looping colist', code, row)
         worksheet.write(row, col, str(code[0]))
+        worksheet.write(row, col)
         row += 1
     workbook.close()
 
@@ -372,7 +373,7 @@ def setting_update(file):
         my_class = db.session.query(tmp_class).filter(tmp_param == str(param)).first()
         
         datamodel = SQLAInterface(tmp_class, session=session)
-        
+    
         if my_class:
             print(my_class)
             my_class.name = name
@@ -572,7 +573,8 @@ def old_codes(self, file):
                     req.cdrlitem_id, req.documentclass_id, req.partner_id)
             print('Wrong Request: ',row[0].value,row[1].value,row[2].value,row[8].value,row[9].value,row[12].value )
     
-    book.save('upload_results.xlsx')
+    result_file = 'app/static/csv/upload_results.xlsx'
+    book.save(result_file)
 
 
     '''
@@ -584,4 +586,4 @@ def old_codes(self, file):
     for i in not_found_list:
         print(i[0],i[1], i[2])
     '''
-    return not_found_list, found_list
+    return not_found_list, found_list, result_file 
