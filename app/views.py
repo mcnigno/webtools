@@ -30,6 +30,7 @@ from flask import request
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import ImmutableMultiDict
 import os
+from flask_appbuilder.security.sqla.models import User
 
 ALLOWED_EXTENSIONS = set(['xlsx'])
 
@@ -167,8 +168,6 @@ def adddoc2(self, item):
     db.session.flush()
 
 
-
-
 def get_pending():
     return 'reserved'
 '''
@@ -220,7 +219,6 @@ class PendingView(ModelView):
         redirect(self.get_redirect())
         #self.update_redirect()
         return send_file('static/csv/' + filename, as_attachment=True)
-
 
 
 class DocumentView(CompactCRUDMixin, ModelView):
@@ -294,6 +292,10 @@ class VendorRequestsView(ModelView):
         'request_type': 'Type',
         'csv': 'XLS'
     }
+    
+    related_views = [DocumentView]
+    show_template = 'appbuilder/general/model/show_cascade.html'
+    edit_template = 'appbuilder/general/model/edit_cascade.html'
 
     base_order = ('id', 'desc')
     
@@ -379,8 +381,6 @@ class VendorRequestsView(ModelView):
             print(code)
             print('SESSION LIST:', session_list)
         toxlsx(self, item, session_list)
-        
-
 
 
 # Engineering Form Request
@@ -403,6 +403,9 @@ class DocRequestsView(ModelView):
                     ['request_type', FilterEqual, 'engineering']
                     ]
     base_permissions = ['can_add','can_list','can_show'] 
+    related_views = [DocumentView]
+    show_template = 'appbuilder/general/model/show_cascade.html'
+    edit_template = 'appbuilder/general/model/edit_cascade.html'
 
     list_title = 'Engineering Code Request'
     add_title = 'Add Engineering Code Request'
@@ -516,6 +519,7 @@ class MaterialclassView(ModelView):
             self.datamodel.delete(items)
         return redirect(self.get_redirect())
 
+
 class DoctypeView(ModelView):
     datamodel = SQLAInterface(Doctype)
     list_columns = ['doctype', 'name', 'description']
@@ -528,6 +532,7 @@ class DoctypeView(ModelView):
         else:
             self.datamodel.delete(items)
         return redirect(self.get_redirect())
+
 
 class PartnerView(ModelView):
     datamodel = SQLAInterface(Partner)
@@ -542,6 +547,7 @@ class PartnerView(ModelView):
         else:
             self.datamodel.delete(items)
         return redirect(self.get_redirect())
+
 
 class CdrlitemView(ModelView):
     datamodel = SQLAInterface(Cdrlitem)
@@ -598,6 +604,7 @@ class MrView(ModelView):
             self.datamodel.delete(items)
         return redirect(self.get_redirect())
 
+
 class MatrixView(ModelView):
     datamodel = SQLAInterface(Matrix)
     list_columns = ['id', 'matrix', 'counter']
@@ -616,21 +623,33 @@ class GroupMasterView(MasterDetailView):
             self.datamodel.delete(items)
         return redirect(self.get_redirect())
 
+
 class MultipleViewsExp(MultipleView):
     views = [UnitView, MaterialclassView, DoctypeView, PartnerView]
     list_widget = ListBlock
 
+def pretty_user(user):
+    
+    return 'some text'
 
 class EncodChartView(GroupByChartView):
     datamodel = SQLAInterface(DocRequests)
     chart_title = 'Grouped Encod'
     label_columns = UnitView.label_columns
-    chart_type = 'PieChart'
+    #chart_type = 'PieChart'
 
     definitions = [
         {
+            'label': 'some label',
             'group': 'unit_id',
             'series': [(aggregate_count, 'unit_id')]
+        },
+        {
+            'group': 'created_by_fk',
+            'series': [(aggregate_count, 'pretty_user'),
+                       (aggregate_count, 'unit'),
+                       (aggregate_count, 'materialclass')
+                       ]
         }
     ]
 
@@ -646,7 +665,12 @@ class ListRequest(ModelView):
     edit_title = 'Modifica Richiesta Codifica'
     show_title = 'Vista Richiesta Codifica'
     related_views = [DocumentView]
+
+    show_template = 'appbuilder/general/model/show_cascade.html'
+    edit_template = 'appbuilder/general/model/edit_cascade.html'
+    
     #list_widget = ListThumbnail
+
     title = "Bapco Document ID Generator"
     label_columns = {
         'csv': 'XLS',
@@ -803,7 +827,7 @@ class Oldcodes(BaseView):
                         filename = secure_filename(file.filename)
                         filename_list.append(filename)
                         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                        res_list, upd_list = old_codes(self, file)
+                        res_list, upd_list, result_file = old_codes(self, file)
                         #for item in res_list:
                             #flash('WARNING: '+ str(item[1])+'is already reserved by '+ str(item[2]), category='warning')
                         reserved_list += res_list
@@ -819,7 +843,9 @@ class Oldcodes(BaseView):
                                             updated_list=updated_list,
                                             count_updated=len(updated_list),
                                             reserved_list=reserved_list,
-                                            count_reserved=len(reserved_list))
+                                            count_reserved=len(reserved_list),
+                                            result_file=result_file
+                                            )
             '''
                 return redirect(url_for('Uploadcodes.upload',
                                         filename=filename_list,
@@ -1061,8 +1087,8 @@ appbuilder.add_view(MatrixView, "Matrix View",
 appbuilder.add_view(GroupMasterView, "GroupMasterView ",
                     icon="fa-folder-open-o", category="Ask Bapco",
                     category_icon='fa-envelope')
-appbuilder.add_view(EncodChartView, "EncodChartView ",
+'''
+appbuilder.add_view(EncodChartView, "EncoChartView ",
                     icon="fa-folder-open-o", category="Bapco Resources",
                     category_icon='fa-envelope')
 
-'''

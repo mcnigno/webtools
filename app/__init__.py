@@ -2,6 +2,8 @@ import logging
 from flask import Flask
 from flask.ext.appbuilder import SQLA, AppBuilder
 from app.index import MyIndexView
+from .momentjs import momentjs
+
 
 
 
@@ -15,6 +17,8 @@ logging.getLogger().setLevel(logging.DEBUG)
  
 app = Flask(__name__)
 app.config.from_object('config')
+app.jinja_env.globals['momentjs'] = momentjs
+
 db = SQLA(app)
 appbuilder = AppBuilder(app, db.session, indexview=MyIndexView, base_template='mybase.html')
 

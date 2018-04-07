@@ -4,6 +4,9 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from time import gmtime, strftime
 from flask import Markup
+from .momentjs import momentjs
+from flask_babel import lazy_gettext as _
+
 
 """
 
@@ -39,7 +42,7 @@ class Materialclass(Model):
 
     def __repr__(self):
         return self.materialclass 
-
+    
 class Doctype(Model):
     __tablename__ = "doctype"
     id = Column(Integer, primary_key=True)
@@ -148,17 +151,23 @@ class DocRequests(AuditMixin, Model):
     def __repr__(self):
         doc_param = "-".join([str(x) for x in [self.unit, self.materialclass, self.doctype]])
 
-        return '[ '+ str(self.quantity) +' ] '+ doc_param + ' by ' + str(self.created_by) +' on ' + str(self.created())
+        return '[ '+ str(self.quantity) +' ] '+ doc_param + ' by ' + str(self.created_by) + ' on ' + str(self.created())
     
     # def __init__(self):
     def csv(self):
         return Markup('<a href="/static/csv/bapco_request_'+ str(self.id) +'.xlsx" download>'+'<img border="0" src="/static/img/excel.png" alt="W3Schools" width="24" height="24">'+'</a>')
         
     def created(self):
-        date = self.created_on
-        return date.strftime('We are the %d, %b %Y')
-        return self.created_on.strftime('%d, %b %Y - %H:%M:%S')
+        #date = self.created_on
+        #return date.strftime('We are the %d, %b %Y')
+        return Markup(_(momentjs(self.created_on).calendar() + ' | ' + momentjs(self.created_on).fromNow()))
+        #return self.created_on.strftime('%d, %b %Y - %H:%M:%S')
     
+    def user_create(self):
+        username = self.user_create()
+         
+        return username
+
     def modified(self):
         date = self.created_on
         #return date.strftime('We are the %d, %b %Y')
@@ -215,9 +224,11 @@ class Document(AuditMixin, Model):
         return self.docrequests.req_type()
 
     def created(self):
-        #date = self.created_on
+        date = self.created_on
         #return date.strftime('We are the %d, %b %Y')
-        return self.created_on.strftime('%d, %b %Y - %H:%M:%S')
+        
+        return Markup(_(momentjs(self.created_on).calendar() + ' | ' + momentjs(self.created_on).fromNow()))
+        #return self.created_on.strftime('%d, %b %Y - %H:%M:%S')
     
     def modified(self):
         #date = self.created_on
