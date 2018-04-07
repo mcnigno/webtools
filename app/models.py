@@ -158,8 +158,8 @@ class DocRequests(AuditMixin, Model):
     def created(self):
         date = self.created_on
         #return date.strftime('We are the %d, %b %Y')
-        #return Markup(momentjs(date).calendar())
-        return self.created_on.strftime('%d, %b %Y - %H:%M:%S')
+        return Markup(momentjs(date).calendar())
+        #return self.created_on.strftime('%d, %b %Y - %H:%M:%S')
 
     def modified(self):
         date = self.created_on
