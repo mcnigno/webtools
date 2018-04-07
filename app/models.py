@@ -4,6 +4,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from time import gmtime, strftime
 from flask import Markup
+from .momentjs import momentjs
 
 """
 
@@ -16,7 +17,7 @@ AuditMixin will add automatic timestamp of created and modified by who
 def mydefault():
     print('by mydefaul function')
     return 'func'
-    
+
 class Unit(Model):
     __tablename__ = "unit"
     id = Column(Integer, primary_key=True)
@@ -156,7 +157,8 @@ class DocRequests(AuditMixin, Model):
         
     def created(self):
         date = self.created_on
-        return date.strftime('We are the %d, %b %Y')
+        #return date.strftime('We are the %d, %b %Y')
+        #return Markup(momentjs(date).calendar())
         return self.created_on.strftime('%d, %b %Y - %H:%M:%S')
 
     def modified(self):
@@ -215,8 +217,9 @@ class Document(AuditMixin, Model):
         return self.docrequests.req_type()
 
     def created(self):
-        #date = self.created_on
+        date = self.created_on
         #return date.strftime('We are the %d, %b %Y')
+        return momentjs(date).calendar() 
         return self.created_on.strftime('%d, %b %Y - %H:%M:%S')
     
     def modified(self):
