@@ -50,7 +50,7 @@ class CsvView(BaseView):
         print('SEND CSV')
         return send_file(filename) 
 
-
+'''
 def choice_unit(self,item):
     print('CHOICE UNIT')
     
@@ -60,7 +60,7 @@ def choice_unit(self,item):
     print(result.name)
     print('lunghezza di result unit:')
     return self, item
-
+'''
 
 def matrixenc(self, item):
 
@@ -223,6 +223,59 @@ class PendingView(ModelView):
         #self.update_redirect()
         return send_file('static/csv/' + filename, as_attachment=True)
 
+class SuperDocumentView(CompactCRUDMixin, ModelView):
+    datamodel = SQLAInterface(Document)
+    list_title = 'Supervisor | Bapco Codes'
+    
+    base_order = ('id', 'desc')
+    #base_filters = [['created_by', FilterEqualFunction, get_user]]
+    base_permissions = ['can_list', 'can_show', 'can_edit'] 
+
+    edit_title = 'Edit Code'
+    show_title = 'Show Code'
+
+    list_columns = ['id', 'code_type', 'bapco_code', 'oldcode', 'created_by', 'created', 'status']
+    edit_columns = ['oldcode']
+    
+    label_columns = {
+        'id': 'ID',
+        'created': 'Created On',
+        'modified': 'Modified On',
+        'changed_by': 'Modified By',
+        'status': 'Status',
+        'oldcode': 'Contractor Code',
+        'code': 'Bapco Code',
+        'code_type': 'Type',
+    }
+    '''
+    @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
+    def muldelete(self, items):
+        if isinstance(items, list):
+            self.datamodel.delete_all(items)
+            self.update_redirect()
+        else:
+            self.datamodel.delete(items)
+        return redirect(self.get_redirect())
+    '''
+    @action("export", "Export", "", "fa-table")
+    def export(self, items):
+        print('Export from DocumentView')
+        if isinstance(items, list):
+            codes_list = []
+            for item in items:
+                print('item', item.code)
+                codes_list.append([item.code, item.oldcode])
+            filename = codes_to_xlsx(codes_list)
+            
+            self.update_redirect()
+            
+        else:
+            filename = codes_to_xlsx(items.code)
+        
+        #print(codes_list)
+        #redirect(self.get_redirect())
+        self.update_redirect()
+        return send_file('static/csv/' + filename, as_attachment=True)
 
 class DocumentView(CompactCRUDMixin, ModelView):
     datamodel = SQLAInterface(Document)
@@ -498,7 +551,12 @@ class AskBapcoView(MultipleView):
 
 class UnitView(CompactCRUDMixin, ModelView):
     datamodel = SQLAInterface(Unit)
-    list_columns = ['unit','name', 'unit_type', 'description']
+    list_columns = ['unit', 'name', 'unit_type', 'description']
+
+    add_columns = ['unit', 'name', 'unit_type', 'start', 'stop']
+    edit_columns = ['unit', 'name', 'unit_type', 'start', 'stop']
+    show_columns = ['unit', 'name', 'unit_type', 'start', 'stop', 'description']
+    
     # list_widget = ListCarousel
     # label_columns = ['unit','description']
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
@@ -513,7 +571,11 @@ class UnitView(CompactCRUDMixin, ModelView):
 
 class MaterialclassView(ModelView):
     datamodel = SQLAInterface(Materialclass)
-    list_columns = ['materialclass','name', 'description']
+    list_columns = ['materialclass', 'name', 'description']
+    add_columns = ['materialclass', 'name', 'description']
+    edit_columns = ['materialclass', 'name', 'description']
+    show_columns = ['materialclass', 'name', 'description']
+    
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
     def muldelete(self, items):
         if isinstance(items, list):
@@ -527,6 +589,10 @@ class MaterialclassView(ModelView):
 class DoctypeView(ModelView):
     datamodel = SQLAInterface(Doctype)
     list_columns = ['doctype', 'name', 'description']
+
+    add_columns = ['doctype', 'name', 'description']
+    edit_columns = ['doctype', 'name', 'description']
+    show_columns = ['doctype', 'name', 'description']
     
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
     def muldelete(self, items):
@@ -540,7 +606,12 @@ class DoctypeView(ModelView):
 
 class PartnerView(ModelView):
     datamodel = SQLAInterface(Partner)
-    list_columns = ['partner','common_start','common_stop', 'description']
+    list_columns = ['partner', 'common_start', 'common_stop', 'description']
+
+    add_columns = ['partner', 'name', 'common_start', 'common_stop', 'description']
+    edit_columns = ['partner', 'name', 'common_start', 'common_stop', 'description']
+    show_columns = ['partner', 'name', 'common_start', 'common_stop', 'description']
+
     list_widget = ListThumbnail
 
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
@@ -557,6 +628,10 @@ class CdrlitemView(ModelView):
     datamodel = SQLAInterface(Cdrlitem)
     list_columns = ['cdrlitem', 'name', 'description']
 
+    add_columns = ['cdrlitem', 'name', 'description']
+    edit_columns = ['cdrlitem', 'name', 'description']
+    show_columns = ['cdrlitem', 'name', 'description']
+
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
     def muldelete(self, items):
         if isinstance(items, list):
@@ -570,6 +645,10 @@ class CdrlitemView(ModelView):
 class DocumentclassView(ModelView):
     datamodel = SQLAInterface(Documentclass)
     list_columns = ['documentclass','name', 'description']
+
+    add_columns = ['documentclass', 'name', 'description']
+    edit_columns = ['documentclass', 'name', 'description']
+    show_columns = ['documentclass', 'name', 'description']
 
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
     def muldelete(self, items):
@@ -585,6 +664,10 @@ class VendorView(ModelView):
     datamodel = SQLAInterface(Vendor)
     list_columns = ['vendor', 'description']
 
+    add_columns = ['vendor', 'name', 'description']
+    edit_columns = ['vendor', 'name', 'description']
+    show_columns = ['vendor', 'name', 'description']
+
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
     def muldelete(self, items):
         if isinstance(items, list):
@@ -597,7 +680,11 @@ class VendorView(ModelView):
 
 class MrView(ModelView):
     datamodel = SQLAInterface(Mr)
-    #list_columns = ['mr', 'description']
+    list_columns = ['mr', 'name', 'description']
+
+    add_columns = ['mr', 'name', 'description']
+    edit_columns = ['mr', 'name', 'description']
+    show_columns = ['mr', 'name', 'description']
 
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
     def muldelete(self, items):
@@ -617,6 +704,7 @@ class MatrixView(ModelView):
 class UserDocumentView(MasterDetailView):
     datamodel = SQLAInterface(User)
     related_views = [DocumentView]
+    value_columns = ['username']
 
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
     def muldelete(self, items):
@@ -789,13 +877,73 @@ class ListRequest(ModelView):
                         ),
                      ]
 
+class SuperListRequest(ModelView):
+    datamodel = SQLAInterface(DocRequests)
+    base_order = ('id', 'desc')
+    #base_filters = [['created_by', FilterEqualFunction, get_user]]
+    base_permissions = ['can_list', 'can_show'] 
+
+    list_title = 'Supervisor - All Requests'
+    add_title = 'Add new Request'
+    edit_title = 'Modifica Richiesta Codifica'
+    show_title = 'Vista Richiesta Codifica'
+    related_views = [DocumentView]
+
+    show_template = 'appbuilder/general/model/show_cascade.html'
+    edit_template = 'appbuilder/general/model/edit_cascade.html'
+    
+    #list_widget = ListThumbnail
+
+    title = "Bapco Document ID Generator"
+    label_columns = {
+        'csv': 'XLS',
+        'req_type': 'Type',
+        'req_description': 'Description',
+        'created': 'Created on'
+
+    }
+    
+    list_columns = ['req_type', 'req_description', 'created', 'csv']
+    edit_columns = ['unit', 'materialclass', 'doctype', 'partner']
+
+
+    add_exclude_columns = ['id', 'matrix']
+
+    add_fieldsets = [
+                        (
+                            'Numero di Codifiche richiesto',
+                            {'fields': ['quantity']}
+                        ),
+                        (
+                            'Bapco Document Setting',
+                            {'fields': ['unit',
+                                        'materialclass',
+                                        'doctype',
+                                        'partner'], 'expanded':True}
+                        ),
+                     ]
+    show_fieldsets = [
+                        (
+                            'Number of Bapco IDs',
+                            {'fields': ['quantity']}
+                        ),
+                        (
+                            'Bapco Document',
+                            {'fields': ['unit',
+                                        'materialclass',
+                                        'doctype',
+                                        'partner'], 'expanded':True}
+                        ),
+                     ]
+
 def allowed_file(filename):
         return '.' in filename and \
             filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 class PartnerRequestView(MasterDetailView):
     datamodel = SQLAInterface(Partner)
-    related_views = [ListRequest]
+    related_views = [SuperListRequest]
+    value_columns = ['name']
 
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
     def muldelete(self, items):
@@ -1100,12 +1248,13 @@ def page_not_found(e):
 db.create_all()
 
 # Risorse Bapco
+'''
 appbuilder.add_view(CommentsView, "Comments",
                     icon="fa-paper-plane", category="Admin",
                     category_icon='fa-bold')
-
+'''
 appbuilder.add_view(Oldcodes, "Old Codes Upload",
-                    icon="fa-paper-plane", category="Admin",
+                    icon="fa-paper-plane", category="Supervisor",
                     category_icon='fa-bold')
 
 
@@ -1150,28 +1299,28 @@ appbuilder.add_view(Setting_updateView, "Update Setting (Excel)",
 appbuilder.add_view(MultipleViewsExp, "Smart Settings",
                     icon="fa-cogs", category="Settings",
                     category_icon='fa-cubes')
-appbuilder.add_view(UnitView, "Lista Unit",
+appbuilder.add_view(UnitView, "Unit",
                     icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
-appbuilder.add_view(MaterialclassView, "Lista Material Class",
+appbuilder.add_view(MaterialclassView, "Material Class",
                     icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
-appbuilder.add_view(DoctypeView, "Lista DocType",
+appbuilder.add_view(DoctypeView, "DocType",
                     icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
-appbuilder.add_view(PartnerView, "Lista Partner",
+appbuilder.add_view(PartnerView, "Partner",
                     icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
-appbuilder.add_view(CdrlitemView, "Lista CDRL Item",
+appbuilder.add_view(CdrlitemView, "CDRL Item",
                     icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
-appbuilder.add_view(DocumentclassView, "Lista Document Class",
+appbuilder.add_view(DocumentclassView, "Document Class",
                     icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
-appbuilder.add_view(VendorView, "Lista Vendor",
+appbuilder.add_view(VendorView, "Vendor",
                     icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
-appbuilder.add_view(MrView, "Lista MR",
+appbuilder.add_view(MrView, "MR",
                     icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
 
@@ -1179,7 +1328,18 @@ appbuilder.add_view(MatrixView, "Matrix View",
                     icon="fa-folder-open-o", category="Settings",
                     category_icon='fa-bomb')
 
-# Bapco Supervisor      
+# Bapco Supervisor
+# 
+#       
+
+appbuilder.add_view(SuperListRequest, "All Requests",
+                    icon="fa-folder-open-o", category="Supervisor",
+                    category_icon='fa-envelope')
+
+appbuilder.add_view(SuperDocumentView, "All Codes",
+                    icon="fa-folder-open-o", category="Supervisor",
+                    category_icon='fa-envelope')
+
 appbuilder.add_view(UserDocumentView, "Codes Generated by User",
                     icon="fa-folder-open-o", category="Supervisor")
 

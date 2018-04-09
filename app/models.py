@@ -64,8 +64,8 @@ class Partner(Model):
     common_stop = Column(Integer, default=0)
     
     def __repr__(self):
-        return self.partner
-
+        return self.name
+    
 
 class Documentclass(Model):
     __tablename__ = "documentclass"
@@ -127,24 +127,24 @@ class DocRequests(AuditMixin, Model):
     __tablename__ = "docrequests"
     id = Column(Integer, primary_key=True)
     unit_id = Column(Integer, ForeignKey('unit.id'), nullable=False)
-    unit = relationship('Unit', backref='docrequest')
+    unit = relationship('Unit')
     materialclass_id = Column(Integer, ForeignKey('materialclass.id'), nullable=False)
-    materialclass = relationship('Materialclass', backref='docrequest')
+    materialclass = relationship('Materialclass')
     doctype_id = Column(Integer, ForeignKey('doctype.id'), nullable=False)
-    doctype = relationship('Doctype', backref='docrequest')
+    doctype = relationship('Doctype')
     sheet = Column(String(3), default='001')
     partner_id = Column(Integer, ForeignKey('partner.id'), nullable=False)
-    partner = relationship('Partner', backref='docrequest')
+    partner = relationship('Partner')
     cdrlitem_id = Column(Integer, ForeignKey('cdrlitem.id'))
-    cdrlitem = relationship('Cdrlitem', backref='docrequest')
+    cdrlitem = relationship('Cdrlitem')
     documentclass_id = Column(Integer, ForeignKey('documentclass.id'))
-    documentclass = relationship('Documentclass', backref='docrequest')
+    documentclass = relationship('Documentclass')
     vendor_id = Column(Integer, ForeignKey('vendor.id'))
-    vendor = relationship('Vendor', backref='docrequest')
+    vendor = relationship('Vendor')
     mr_id = Column(Integer, ForeignKey('mr.id'))
-    mr = relationship('Mr', backref='docrequest')
+    mr = relationship('Mr')
     matrix_id = Column(Integer, ForeignKey('matrix.id'))
-    matrix = relationship('Matrix', backref='docrequest')
+    matrix = relationship('Matrix')
     quantity = Column(Integer, default=1)
     request_type = Column(String(20))
     

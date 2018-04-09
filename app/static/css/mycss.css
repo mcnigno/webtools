@@ -38,3 +38,7 @@ body {
     height: 100%;
 }
 */
+.navbar-inverse {
+    background-image: linear-gradient(#e9242d, #e9242d 60%, #e9242d);
+
+}
