@@ -556,8 +556,8 @@ class PartnerView(ModelView):
     list_columns = ['partner', 'common_start', 'common_stop', 'description']
 
     add_columns = ['partner', 'name', 'common_start', 'common_stop', 'description']
-    edit_columns = ['partner', 'name', 'description']
-    show_columns = ['partner', 'name', 'description']
+    edit_columns = ['partner', 'name', 'common_start', 'common_stop', 'description']
+    show_columns = ['partner', 'name', 'common_start', 'common_stop', 'description']
 
     list_widget = ListThumbnail
 
