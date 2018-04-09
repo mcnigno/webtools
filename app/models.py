@@ -6,7 +6,7 @@ from time import gmtime, strftime
 from flask import Markup
 from .momentjs import momentjs
 from flask_babel import lazy_gettext as _
-from .helpers import gen_excel_byreq
+#from .helpers import gen_excel_byreq
 
 
 """
@@ -156,8 +156,9 @@ class DocRequests(AuditMixin, Model):
     
     # def __init__(self):
     def csv(self):
-        filename = gen_excel_byreq(self)
-           return Markup('<a href="/static/csv/' + filename +" download>'+'<img border="0" src="/static/img/excel.png" alt="W3Schools" width="24" height="24">'+'</a>')
+        #filename = gen_excel_byreq(self)
+        #return Markup('<a href="/static/csv/' + filename +'" download>'+'<img border="0" src="/static/img/excel.png" alt="W3Schools" width="24" height="24">'+'</a>')
+        return 'nothing'
         
     def created(self):
         #date = self.created_on
