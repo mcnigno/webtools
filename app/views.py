@@ -704,6 +704,7 @@ class MatrixView(ModelView):
 class UserDocumentView(MasterDetailView):
     datamodel = SQLAInterface(User)
     related_views = [DocumentView]
+    value_columns = ['username']
 
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
     def muldelete(self, items):
@@ -876,13 +877,72 @@ class ListRequest(ModelView):
                         ),
                      ]
 
+class SuperListRequest(ModelView):
+    datamodel = SQLAInterface(DocRequests)
+    base_order = ('id', 'desc')
+    #base_filters = [['created_by', FilterEqualFunction, get_user]]
+    base_permissions = ['can_list', 'can_show'] 
+
+    list_title = 'Supervisor - All Requests'
+    add_title = 'Add new Request'
+    edit_title = 'Modifica Richiesta Codifica'
+    show_title = 'Vista Richiesta Codifica'
+    related_views = [DocumentView]
+
+    show_template = 'appbuilder/general/model/show_cascade.html'
+    edit_template = 'appbuilder/general/model/edit_cascade.html'
+    
+    #list_widget = ListThumbnail
+
+    title = "Bapco Document ID Generator"
+    label_columns = {
+        'csv': 'XLS',
+        'req_type': 'Type',
+        'req_description': 'Description',
+        'created': 'Created on'
+
+    }
+    
+    list_columns = ['req_type', 'req_description', 'created', 'csv']
+    edit_columns = ['unit', 'materialclass', 'doctype', 'partner']
+
+
+    add_exclude_columns = ['id', 'matrix']
+
+    add_fieldsets = [
+                        (
+                            'Numero di Codifiche richiesto',
+                            {'fields': ['quantity']}
+                        ),
+                        (
+                            'Bapco Document Setting',
+                            {'fields': ['unit',
+                                        'materialclass',
+                                        'doctype',
+                                        'partner'], 'expanded':True}
+                        ),
+                     ]
+    show_fieldsets = [
+                        (
+                            'Number of Bapco IDs',
+                            {'fields': ['quantity']}
+                        ),
+                        (
+                            'Bapco Document',
+                            {'fields': ['unit',
+                                        'materialclass',
+                                        'doctype',
+                                        'partner'], 'expanded':True}
+                        ),
+                     ]
+
 def allowed_file(filename):
         return '.' in filename and \
             filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 class PartnerRequestView(MasterDetailView):
     datamodel = SQLAInterface(Partner)
-    related_views = [ListRequest]
+    related_views = [SuperListRequest]
     value_columns = ['name']
 
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
@@ -1271,6 +1331,11 @@ appbuilder.add_view(MatrixView, "Matrix View",
 # Bapco Supervisor
 # 
 #       
+
+appbuilder.add_view(SuperListRequest, "All Requests",
+                    icon="fa-folder-open-o", category="Supervisor",
+                    category_icon='fa-envelope')
+
 appbuilder.add_view(SuperDocumentView, "All Codes",
                     icon="fa-folder-open-o", category="Supervisor",
                     category_icon='fa-envelope')
