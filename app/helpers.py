@@ -216,6 +216,148 @@ def bapco(self, item):
     db.session.flush()
     return code
 
+def init_bapco(self, item):
+    # Set the DB session
+    session = db.session
+
+    id_unit = db.session.query(Unit).filter(Unit.id == str(item.unit_id)).first()
+    print('id_unit ',id_unit)
+    id_materialclass = db.session.query(Materialclass).filter(Materialclass.id == str(item.materialclass_id)).first()
+    id_doctype = db.session.query(Doctype).filter(Doctype.id == str(item.doctype_id)).first()
+    id_patner = db.session.query(Partner).filter(Partner.id == str(item.partner_id)).first()
+    id_cdrlitem = None
+    id_documentclass = None
+    id_vendor = None
+    id_mr = None
+    
+    req = DocRequests(unit_id=id_unit.id, materialclass_id=id_materialclass.id, 
+                      doctype_id=id_doctype.id, partner_id=id_patner.id,
+                      request_type=item.request_type)
+
+    if item.cdrlitem_id:
+        id_cdrlitem = db.session.query(Cdrlitem).filter(Cdrlitem.id == str(item.cdrlitem_id)).first()
+        req.cdrlitem_id = id_cdrlitem.id
+        
+    if item.documentclass_id:
+        id_documentclass = db.session.query(Documentclass).filter(Documentclass.id == str(item.documentclass_id)).first()
+        req.documentclass_id = id_documentclass.id
+    # Set the Request type
+    if item.vendor and item.mr:
+        req.request_type = 'vendor'
+        id_vendor = db.session.query(Vendor).filter(Vendor.id == str(item.vendor_id)).first()
+        id_mr = db.session.query(Mr).filter(Mr.id == str(item.mr_id)).first()
+        req.vendor_id = id_vendor.id
+        req.mr_id = id_mr.id
+    
+    else:
+        req.request_type = 'engineering'
+    
+    # Set item_matrix based on unit type
+    result = db.session.query(Unit).filter(Unit.id == str(item.unit_id)).first()
+    
+    if str(result.unit_type) == 'common':
+        print('Match unit type common Found')
+
+        # Add the partner id to the matrix
+        item_matrix = str.join('-', (str(id_unit.unit),
+                                     str(id_materialclass.materialclass),
+                                     str(id_doctype.doctype),
+                                     # item.sheet,
+                                     str(id_patner.partner)
+                                     ))
+    else:
+        item_matrix = str.join('-', (str(id_unit.unit),
+                                     str(id_materialclass.materialclass),
+                                     str(id_doctype.doctype),
+                                     # item.sheet,
+                                     ))
+    # Set the bapco base code
+    item_serial = str.join('-', (str(id_unit.unit),
+                                 str(id_materialclass.materialclass),
+                                 str(id_doctype.doctype),
+                                 # item.sheet,
+                                 ))
+    
+    # Increment the Matrix counter or create a new one
+    print('Matrix to search:', 
+    (str(id_unit.unit),
+                                     str(id_materialclass.materialclass),
+                                     str(id_doctype.doctype),
+                                     # item.sheet,
+                                     str(id_patner.partner)
+                                     )
+    )
+    matrix = db.session.query(Matrix).filter(Matrix.matrix == item_matrix).first()
+    if matrix:
+        matrix.counter += 1
+        datamodel = SQLAInterface(Matrix, session=session)
+        datamodel.edit(matrix)
+
+        req.matrix_id = matrix.id
+        code = item_serial + "-" + str(matrix.counter).zfill(5) + "-" + item.sheet
+        
+        datamodel = SQLAInterface(Document, session=session)
+        
+        doc = Document(docrequests=req, code=code)
+        
+        datamodel.add(doc)
+
+        message = 'Your code is ' + code
+        flash(message, category='info')
+    else:
+        # Create a New Matrix for common units
+        if result.unit_type == 'common':
+
+            print('item partner to find: ', id_patner.partner)
+            
+            partner = db.session.query(Partner).filter(Partner.id == str(item.partner_id)).first()
+           
+            matrix = Matrix(counter=partner.common_start + 1, matrix=str(item_matrix))
+            datamodel = SQLAInterface(Matrix, session=session)
+            datamodel.add(matrix)
+            
+            # Find the Matrix'ID
+            id_matrix = db.session.query(Matrix).filter(Matrix.matrix == item_matrix).first()
+            req.matrix_id = id_matrix.id 
+
+            # Add new Doc with quantity partner common start + 1
+            
+            code = item_serial + "-" + str(partner.common_start + 1).zfill(5) + "-" + item.sheet
+            
+            datamodel = SQLAInterface(Document, session=session)
+            
+            doc = Document(docrequests=req, code=code)
+            
+            
+            datamodel.add(doc)
+            
+            message = 'Your code is ' + code
+            flash(message, category='info')
+        else:
+            # Create a new Matrix for standard units
+            datamodel = SQLAInterface(Matrix, session=session)
+            matrix = Matrix(matrix=item_matrix)
+            datamodel.add(matrix)
+            
+            # Find the Matrix'ID
+            id_matrix = db.session.query(Matrix).filter(Matrix.matrix == item_matrix).first()
+            req.matrix_id = id_matrix.id
+
+            # Add new Doc with quantity 1
+            
+            code = item_serial + "-" + "1".zfill(5) + "-" + item.sheet
+            
+            datamodel = SQLAInterface(Document, session=session)
+            
+            doc = Document(docrequests=req, code=code)   
+            
+            datamodel.add(doc)
+            
+            message = 'Your code is ' + code
+            flash(message, category='info')
+
+    db.session.flush()
+    return code
 
 def tocsv(self, item,  codes_list):
     print('tocsv FUNCTION')
@@ -309,6 +451,7 @@ def codes_to_xlsx(codes_list):
     for code in (t_list):
         print('Looping colist', code, row)
         worksheet.write(row, col, str(code[0]))
+        worksheet.write(row, col+1, str(code[1]))
         row += 1
     workbook.close()
     return filename
@@ -450,15 +593,26 @@ def old_codes_update(self, file):
     book.close()
     return reserved_list, updated_list
 
+def gen_excel_byreq(req_item):
+    session = db.session
+    req = session.query(Document).filter(Document.docrequests_id == req_item.id).all()
+
+    codes_list = []
+    for item in req:
+        codes_list.append([item.code,item.oldcode])
+    
+    filename = codes_to_xlsx(codes_list)
+    return filename
+    
 #xls = open('bapco_codes.xlsx','rb')
 def old_codes(self, file):
     book = openpyxl.load_workbook(file)
     sheet = book.active
     session = db.session
     # Create the datamodel
-    datamodel = SQLAInterface(DocRequests, session=session)
-    first_req = DocRequests(unit=Unit(unit='QSR'), materialclass=Materialclass(materialclass='1'), doctype=Doctype(doctype='QSR'), partner=Partner(partner='QSR'))
-    datamodel.add(first_req)
+    #datamodel = SQLAInterface(DocRequests, session=session)
+    # first_req = DocRequests(unit=Unit(unit='QSR'), materialclass=Materialclass(materialclass='1'), doctype=Doctype(doctype='QSR'), partner=Partner(partner='QSR'))
+    #datamodel.add(first_req)
     
 
     
@@ -472,26 +626,38 @@ def old_codes(self, file):
        
         # Unit Query
         if row[0].value:
+            print('row[0] value is:' ,row[0].value)
             try:
                 unit_id = session.query(Unit).filter(Unit.unit == row[0].value).first()
-                req.unit_id = unit_id.id
-                req.unit = unit_id.unit
-                #req.unit.unit = unit_id.unit
+                print('query: unit_id is:', unit_id)
+                print('query: unit_id.id is:', unit_id.id)
+                print('query: unit_id.unit is:', unit_id.unit)
+                print('query: unit_id.unit_type is:', unit_id.unit_type)
                 
+                req.unit_id = unit_id.id
+                print('stop here')
+                #req.unit = unit_id.unit
+                
+                #req.unit.unit = unit_id.unit
+                print('stop 2 here')
+                '''
                 if unit_id.unit_type == '000':
-                    req.unit_type = 'common'
-
+                    print('checking common')
+                    #req.unit_type = 'common'
+                '''
+                print('req_unit_id is : ', req.unit_id)
                 found_list.append(['Unit', req.unit_id, row[0].value])
             except:
                 check = False
-                not_found_list.append(['bapco: '+row[5].value+' for '+row[7].value,'Unit Not Found',row[0].value ])
 
+                not_found_list.append(['bapco: '+row[5].value+' for '+row[7].value,'Unit Not Found',row[0].value ])
+        print('after unit query the check is: ', check)
         # Materialclass Query
         if row[1].value:
             try:
                 mat_id = session.query(Materialclass).filter(Materialclass.materialclass == row[1].value).first()
                 req.materialclass_id = mat_id.id
-                req.materialclass = mat_id.materialclass
+                #req.materialclass = mat_id.materialclass
                 found_list.append(['Materialclass', req.materialclass_id, row[1].value])
             except:
                 check = False
@@ -502,18 +668,21 @@ def old_codes(self, file):
             try:
                 doc_id = session.query(Doctype).filter(Doctype.doctype == row[2].value).first()
                 req.doctype_id = doc_id.id
-                req.doctype = doc_id.doctype
+                #req.doctype = doc_id.doctype 
                 found_list.append(['Doctype', req.doctype_id, row[2].value])
             except:
                 check = False
                 not_found_list.append(['bapco: '+row[5].value+' for '+row[7].value,'Doctype Not Found',row[2].value ])
 
         # CdrlItem Query
+        print('cdrl item before check:', row[8].value)
         if row[8].value:
+            print('cdrl item',row[8])
             try:
-                cdrl_id = session.query(Cdrlitem).filter(Cdrlitem.cdrlitem == row[8].value).first()
+                cdrl_id = session.query(Cdrlitem).filter(Cdrlitem.cdrlitem == str(row[8].value)).first()
                 req.cdrlitem_id = cdrl_id.id
-                req.cdrlitem = cdrl_id.cdrlitem
+                print('we got the crdrl item', req.cdrlitem_id)
+                #req.cdrlitem = cdrl_id.cdrlitem
                 found_list.append(['Cdrlitem', req.cdrlitem_id, row[8].value])
             except:
                 #check = False
@@ -521,10 +690,11 @@ def old_codes(self, file):
         
         # Documentclass Query
         if row[9].value:
+            print('document class',row[9])
             try:
-                dc_id = session.query(Documentclass).filter(Documentclass.documentclass == row[9].value).first()
+                dc_id = session.query(Documentclass).filter(Documentclass.documentclass == str(row[9].value)).first()
                 req.documentclass_id = dc_id.id
-                req.documentclass = dc_id.documentclass
+                #req.documentclass = dc_id.documentclass
                 found_list.append(['Documentclass', req.documentclass_id, row[9].value])
             except:
                 #check = False
@@ -536,7 +706,7 @@ def old_codes(self, file):
                 
                 pa_id = session.query(Partner).filter(Partner.partner == row[12].value).first()
                 req.partner_id = pa_id.id
-                req.partner = pa_id.partner
+                #req.partner = pa_id.partner
                 found_list.append(['Partner', req.partner_id, row[12].value])
             except:
                 check = False
@@ -556,7 +726,7 @@ def old_codes(self, file):
         '''
         
         if check is True:
-            code = bapco(self, req)
+            code = init_bapco(self, req)
             ask_bapco_code = row[13].value
             row[13].value = code
             

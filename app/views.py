@@ -8,7 +8,7 @@ from .models import (DocRequests, Unit, Materialclass, Doctype,
                      Vendor, Mr, Comments)
 from flask_appbuilder.fieldwidgets import Select2AJAXWidget
 from flask_appbuilder.fields import AJAXSelectField
-from flask_appbuilder.models.group import aggregate_count
+from flask_appbuilder.models.group import aggregate_count, aggregate_sum
 from flask_appbuilder.widgets import ListThumbnail, ListBlock
 from flask_appbuilder.models.sqla.filters import (FilterStartsWith,
                                                   FilterEqualFunction,
@@ -16,6 +16,7 @@ from flask_appbuilder.models.sqla.filters import (FilterStartsWith,
                                                   FilterEqual,
                                                   FilterNotStartsWith, FilterEqual
                                                   )
+from flask_appbuilder.security.views import UserDBModelView
 from flask import g, send_file
 from flask_babel import gettext
 from flask_appbuilder import BaseView, expose, has_access
@@ -31,6 +32,8 @@ from werkzeug.utils import secure_filename
 from werkzeug.datastructures import ImmutableMultiDict
 import os
 from flask_appbuilder.security.sqla.models import User
+from .momentjs import momentjs
+from flask import Markup
 
 ALLOWED_EXTENSIONS = set(['xlsx'])
 
@@ -171,7 +174,7 @@ def adddoc2(self, item):
 def get_pending():
     return 'reserved'
 '''
-
+        
 
 class PendingView(ModelView):
     datamodel = SQLAInterface(Document)
@@ -245,6 +248,7 @@ class DocumentView(CompactCRUDMixin, ModelView):
         'code': 'Bapco Code',
         'code_type': 'Type',
     }
+    '''
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
     def muldelete(self, items):
         if isinstance(items, list):
@@ -253,7 +257,7 @@ class DocumentView(CompactCRUDMixin, ModelView):
         else:
             self.datamodel.delete(items)
         return redirect(self.get_redirect())
-    
+    '''
     @action("export", "Export", "", "fa-table")
     def export(self, items):
         print('Export from DocumentView')
@@ -261,7 +265,7 @@ class DocumentView(CompactCRUDMixin, ModelView):
             codes_list = []
             for item in items:
                 print('item', item.code)
-                codes_list.append([item.code])
+                codes_list.append([item.code, item.oldcode])
             filename = codes_to_xlsx(codes_list)
             
             self.update_redirect()
@@ -483,13 +487,13 @@ class DocRequestsView(ModelView):
             session_list.append([code])
             print(code)
             print('SESSION LIST:', session_list)
-        toxlsx(self, item, session_list)
+        #toxlsx(self, item, session_list)
 
 
 class AskBapcoView(MultipleView):
     datamodel = SQLAInterface(DocRequests)
-    views = [DocRequestsView, PendingView]
-    list_columns = ['id']
+    views = [DocRequestsView, VendorRequestsView]
+    
     
 
 class UnitView(CompactCRUDMixin, ModelView):
@@ -610,9 +614,9 @@ class MatrixView(ModelView):
     list_columns = ['id', 'matrix', 'counter']
 
 
-class GroupMasterView(MasterDetailView):
-    datamodel = SQLAInterface(Doctype)
-    related_views = [DocRequestsView]
+class UserDocumentView(MasterDetailView):
+    datamodel = SQLAInterface(User)
+    related_views = [DocumentView]
 
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
     def muldelete(self, items):
@@ -628,31 +632,103 @@ class MultipleViewsExp(MultipleView):
     views = [UnitView, MaterialclassView, DoctypeView, PartnerView]
     list_widget = ListBlock
 
-def pretty_user(user):
-    
-    return 'some text'
 
-class EncodChartView(GroupByChartView):
+def pretty_month_year(value):
+    return Markup(momentjs(value.created_on).format('MMM Y'))
+
+class RequestChartView(GroupByChartView):
     datamodel = SQLAInterface(DocRequests)
-    chart_title = 'Grouped Encod'
+    
+    chart_title = 'Requests Chart'
     label_columns = UnitView.label_columns
     #chart_type = 'PieChart'
+    chart_type = 'BarChart'
 
     definitions = [
         {
-            'label': 'some label',
-            'group': 'unit_id',
-            'series': [(aggregate_count, 'unit_id')]
+            'label': 'User',
+            'group': 'user_create',
+            'series': [(aggregate_count, 'id')]
         },
         {
-            'group': 'created_by_fk',
-            'series': [(aggregate_count, 'pretty_user'),
-                       (aggregate_count, 'unit'),
-                       (aggregate_count, 'materialclass')
-                       ]
+            'label': 'Type',
+            'group': 'request_type',
+            'series': [(aggregate_count, 'id')]
+        },
+        {
+            'label': 'Unit',
+            'group': 'unit_c',
+            'series': [(aggregate_count, 'id')]
+        },
+        {
+            'label': 'Mat Class',
+            'group': 'materialclass_c',
+            'series': [(aggregate_count, 'id')]
+        },
+        {
+            'label': 'Doc Type',
+            'group': 'doctype_c',
+            'series': [(aggregate_count, 'id')]
+        },
+        {
+            'label': 'CDRL',
+            'group': 'cdrlitem_c',
+            'series': [(aggregate_count, 'id')]
+        },
+        {
+            'label': 'Doc Class',
+            'group': 'documentclass_c',
+            'series': [(aggregate_count, 'id')]
+        },
+        {
+            'label': 'Vendor',
+            'group': 'vendor_c',
+            'series': [(aggregate_count, 'id')]
+        },
+        {
+            'label': 'MR',
+            'group': 'mr_c',
+            'series': [(aggregate_count, 'id')]
+        },
+        {
+            'label': 'Partner',
+            'group': 'partner_c', 
+            'series': [(aggregate_count, 'id')]
+        },
+        {
+            'label': 'Matrix',
+            'group': 'matrix_c',
+            'series': [(aggregate_count, 'id')]
         }
+        
     ]
 
+class TimelineChart(GroupByChartView):
+    datamodel = SQLAInterface(DocRequests)
+    
+    chart_title = 'Timeline Requests Chart'
+    #label_columns = ['some','label']
+    chart_type = 'BarChart'
+
+    definitions = [
+        {
+            'label': 'Month',
+            'group': 'pretty_month_year',
+            'series': [(aggregate_count, 'id'),
+                       (aggregate_sum, 'quantity')
+            ]
+        },
+        {
+            'label': 'by DocType',
+            'group': 'doctype_c',
+            'series': [(aggregate_count, 'doctype_c')]
+        },
+        {
+            'label': 'by User',
+            'group': 'user_create',
+            'series': [(aggregate_count, 'request_type')]
+        }
+    ]
 
 class ListRequest(ModelView):
     datamodel = SQLAInterface(DocRequests)
@@ -717,6 +793,19 @@ def allowed_file(filename):
         return '.' in filename and \
             filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+class PartnerRequestView(MasterDetailView):
+    datamodel = SQLAInterface(Partner)
+    related_views = [ListRequest]
+
+    @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
+    def muldelete(self, items):
+        if isinstance(items, list):
+            self.datamodel.delete_all(items)
+            self.update_redirect()
+        else:
+            self.datamodel.delete(items)
+        return redirect(self.get_redirect())
+
 class Setting_updateView(BaseView):
     default_view = 'upload_setting'
 
@@ -758,8 +847,8 @@ class Setting_updateView(BaseView):
                         filename_list.append(filename)
                         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                         res_list, upd_list = setting_update(file)
-                        for item in res_list:
-                            flash('WARNING: '+ str(item[1])+'is already reserved by '+ str(item[2]), category='warning')
+                        #for item in res_list:
+                            #flash('WARNING: '+ str(item[1])+'is already reserved by '+ str(item[2]), category='warning')
                         reserved_list += res_list
                         updated_list += upd_list
                         
@@ -909,8 +998,8 @@ class Uploadcodes(BaseView):
                         filename_list.append(filename)
                         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                         res_list, upd_list = update_from_xlsx(file)
-                        for item in res_list:
-                            flash('WARNING: '+ str(item[1])+'is already reserved by '+ str(item[2]), category='warning')
+                        #for item in res_list:
+                            #flash('WARNING: '+ str(item[1])+'is already reserved by '+ str(item[2]), category='warning')
                         reserved_list += res_list
                         updated_list += upd_list
                         
@@ -1012,83 +1101,95 @@ db.create_all()
 
 # Risorse Bapco
 appbuilder.add_view(CommentsView, "Comments",
-                    icon="fa-paper-plane", category="Update Bapco",
+                    icon="fa-paper-plane", category="Admin",
                     category_icon='fa-bold')
 
 appbuilder.add_view(Oldcodes, "Old Codes Upload",
-                    icon="fa-paper-plane", category="Update Bapco",
+                    icon="fa-paper-plane", category="Admin",
                     category_icon='fa-bold')
 
 
-appbuilder.add_view(Uploadcodes, "Update from XLSX",
-                    icon="fa-paper-plane", category="Update Bapco",
-                    category_icon='fa-bold')
+
 #appbuilder.add_view_no_menu(DocRequestsView)
 appbuilder.add_view(DocRequestsView, "Engineering Code Request",
-                    icon="fa-paper-plane", category="Ask Bapco",
+                    icon="fa-paper-plane", category="Requests",
                     category_icon='fa-bold')
 
 appbuilder.add_view(VendorRequestsView, "Vendor Code Request",
-                    icon="fa-paper-plane", category="Ask Bapco",
+                    icon="fa-paper-plane", category="Requests",
+                    category_icon='fa-bold')
+
+appbuilder.add_view(AskBapcoView, "N Request",
+                    icon="fa-paper-plane", category="Requests",
                     category_icon='fa-bold')
 
 
-appbuilder.add_separator(category='Ask Bapco')
+appbuilder.add_separator(category='Requests')
 
 appbuilder.add_view(ListRequest, "All Requests",
-                    icon="fa-codepen", category="Ask Bapco")
+                    icon="fa-codepen", category="Requests")
 
 appbuilder.add_view(DocumentView, "All Your Codes",
-                    icon="fa-list", category="Bapco Codes")
+                    icon="fa-list", category="Your Codes")
 
 appbuilder.add_view(PendingView, "Only Pending Codes",
-                    icon="fa-folder-open", category="Bapco Codes",
+                    icon="fa-folder-open", category="Your Codes",
+                    category_icon='fa-bold')
+
+appbuilder.add_separator(category="Your Codes")
+
+appbuilder.add_view(Uploadcodes, "Update Codes (Excel)",
+                    icon="fa-paper-plane", category="Your Codes",
                     category_icon='fa-bold')
 
 # Bapco Setting
-appbuilder.add_view(Setting_updateView, "Update Setting from XLSX",
-                    icon="fa-cogs", category="Bapco Settings",
+appbuilder.add_view(Setting_updateView, "Update Setting (Excel)",
+                    icon="fa-cogs", category="Settings",
                     category_icon='fa-cubes')
 
 appbuilder.add_view(MultipleViewsExp, "Smart Settings",
-                    icon="fa-cogs", category="Bapco Settings",
+                    icon="fa-cogs", category="Settings",
                     category_icon='fa-cubes')
 appbuilder.add_view(UnitView, "Lista Unit",
-                    icon="fa-list", category="Bapco Settings",
+                    icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
 appbuilder.add_view(MaterialclassView, "Lista Material Class",
-                    icon="fa-list", category="Bapco Settings",
+                    icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
 appbuilder.add_view(DoctypeView, "Lista DocType",
-                    icon="fa-list", category="Bapco Settings",
+                    icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
 appbuilder.add_view(PartnerView, "Lista Partner",
-                    icon="fa-list", category="Bapco Settings",
+                    icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
 appbuilder.add_view(CdrlitemView, "Lista CDRL Item",
-                    icon="fa-list", category="Bapco Settings",
+                    icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
 appbuilder.add_view(DocumentclassView, "Lista Document Class",
-                    icon="fa-list", category="Bapco Settings",
+                    icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
 appbuilder.add_view(VendorView, "Lista Vendor",
-                    icon="fa-list", category="Bapco Settings",
+                    icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
 appbuilder.add_view(MrView, "Lista MR",
-                    icon="fa-list", category="Bapco Settings",
+                    icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
 
-# Bapco Backend
 appbuilder.add_view(MatrixView, "Matrix View",
-                    icon="fa-folder-open-o", category="Bapco Backend",
+                    icon="fa-folder-open-o", category="Settings",
                     category_icon='fa-bomb')
 
-'''
-appbuilder.add_view(GroupMasterView, "GroupMasterView ",
-                    icon="fa-folder-open-o", category="Ask Bapco",
-                    category_icon='fa-envelope')
-'''
-appbuilder.add_view(EncodChartView, "EncoChartView ",
-                    icon="fa-folder-open-o", category="Bapco Resources",
+# Bapco Supervisor
+appbuilder.add_view(UserDocumentView, "Codes Generated by User",
+                    icon="fa-folder-open-o", category="Supervisor")
+
+appbuilder.add_view(PartnerRequestView, "Codes Generated by Partner",
+                    icon="fa-folder-open-o", category="Supervisor")
+
+appbuilder.add_view(RequestChartView, "Naming Requests Chart",
+                    icon="fa-folder-open-o", category="Supervisor",
                     category_icon='fa-envelope')
 
+appbuilder.add_view(TimelineChart, "Timeline Request Chart",
+                    icon="fa-folder-open-o", category="Supervisor",
+                    category_icon='fa-envelope')

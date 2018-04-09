@@ -6,6 +6,7 @@ from time import gmtime, strftime
 from flask import Markup
 from .momentjs import momentjs
 from flask_babel import lazy_gettext as _
+from .helpers import gen_excel_byreq
 
 
 """
@@ -126,24 +127,24 @@ class DocRequests(AuditMixin, Model):
     __tablename__ = "docrequests"
     id = Column(Integer, primary_key=True)
     unit_id = Column(Integer, ForeignKey('unit.id'), nullable=False)
-    unit = relationship('Unit')
+    unit = relationship('Unit', backref='docrequest')
     materialclass_id = Column(Integer, ForeignKey('materialclass.id'), nullable=False)
-    materialclass = relationship('Materialclass')
+    materialclass = relationship('Materialclass', backref='docrequest')
     doctype_id = Column(Integer, ForeignKey('doctype.id'), nullable=False)
-    doctype = relationship('Doctype')
+    doctype = relationship('Doctype', backref='docrequest')
     sheet = Column(String(3), default='001')
     partner_id = Column(Integer, ForeignKey('partner.id'), nullable=False)
-    partner = relationship('Partner')
+    partner = relationship('Partner', backref='docrequest')
     cdrlitem_id = Column(Integer, ForeignKey('cdrlitem.id'))
-    cdrlitem = relationship('Cdrlitem')
+    cdrlitem = relationship('Cdrlitem', backref='docrequest')
     documentclass_id = Column(Integer, ForeignKey('documentclass.id'))
-    documentclass = relationship('Documentclass')
+    documentclass = relationship('Documentclass', backref='docrequest')
     vendor_id = Column(Integer, ForeignKey('vendor.id'))
-    vendor = relationship('Vendor')
+    vendor = relationship('Vendor', backref='docrequest')
     mr_id = Column(Integer, ForeignKey('mr.id'))
-    mr = relationship('Mr')
+    mr = relationship('Mr', backref='docrequest')
     matrix_id = Column(Integer, ForeignKey('matrix.id'))
-    matrix = relationship('Matrix')
+    matrix = relationship('Matrix', backref='docrequest')
     quantity = Column(Integer, default=1)
     request_type = Column(String(20))
     
@@ -155,18 +156,21 @@ class DocRequests(AuditMixin, Model):
     
     # def __init__(self):
     def csv(self):
-        return Markup('<a href="/static/csv/bapco_request_'+ str(self.id) +'.xlsx" download>'+'<img border="0" src="/static/img/excel.png" alt="W3Schools" width="24" height="24">'+'</a>')
+        filename = gen_excel_byreq(self)
+           return Markup('<a href="/static/csv/' + filename +" download>'+'<img border="0" src="/static/img/excel.png" alt="W3Schools" width="24" height="24">'+'</a>')
         
     def created(self):
         #date = self.created_on
         #return date.strftime('We are the %d, %b %Y')
-        return Markup(_(momentjs(self.created_on).calendar() + ' | ' + momentjs(self.created_on).fromNow()))
+        #return Markup(_(momentjs(self.created_on).calendar() + ' | ' + momentjs(self.created_on).fromNow()))
+        return Markup(momentjs(self.created_on).format('D MMM Y | LT'))
         #return self.created_on.strftime('%d, %b %Y - %H:%M:%S')
     
+    def pretty_month_year(self):
+        return self.created_on.strftime('%d, %b %Y')
+
     def user_create(self):
-        username = self.user_create()
-         
-        return username
+        return str(self.created_by)
 
     def modified(self):
         date = self.created_on
@@ -195,6 +199,34 @@ class DocRequests(AuditMixin, Model):
             return Markup(desc_vend)
             #return 'description1'
         return Markup(desc_eng)
+
+    def doctype_c(self):
+        return str(self.doctype)
+    
+    def unit_c(self):
+        return str(self.unit)
+    
+    def materialclass_c(self):
+        return str(self.materialclass)
+    
+    def cdrlitem_c(self):
+        return str(self.cdrlitem)
+    
+    def documentclass_c(self):
+        return str(self.documentclass)
+    
+    def vendor_c(self):
+        return str(self.vendor)
+    
+    def mr_c(self):
+        return str(self.mr)
+    
+    def matrix_c(self):
+        return str(self.matrix)
+
+    def partner_c(self):
+        return str(self.partner)
+    
     
     
 class Document(AuditMixin, Model):
@@ -209,8 +241,7 @@ class Document(AuditMixin, Model):
     status = Column(String(30))
 
     def __repr__(self):
-        name = 'some Document name'
-        return name
+        return self.code
 
     def status(self):
         if self.oldcode == 'empty':
@@ -227,8 +258,9 @@ class Document(AuditMixin, Model):
         date = self.created_on
         #return date.strftime('We are the %d, %b %Y')
         
-        return Markup(_(momentjs(self.created_on).calendar() + ' | ' + momentjs(self.created_on).fromNow()))
+        #return Markup(_(momentjs(self.created_on).calendar() + ' | ' + momentjs(self.created_on).fromNow()))
         #return self.created_on.strftime('%d, %b %Y - %H:%M:%S')
+        return Markup(momentjs(self.created_on).format('D MMM Y | LT'))
     
     def modified(self):
         #date = self.created_on
