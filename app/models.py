@@ -65,7 +65,7 @@ class Partner(Model):
     
     def __repr__(self):
         return self.name
-
+    
 
 class Documentclass(Model):
     __tablename__ = "documentclass"

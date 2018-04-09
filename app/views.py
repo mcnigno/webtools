@@ -1135,12 +1135,13 @@ def page_not_found(e):
 db.create_all()
 
 # Risorse Bapco
+'''
 appbuilder.add_view(CommentsView, "Comments",
                     icon="fa-paper-plane", category="Admin",
                     category_icon='fa-bold')
-
+'''
 appbuilder.add_view(Oldcodes, "Old Codes Upload",
-                    icon="fa-paper-plane", category="Admin",
+                    icon="fa-paper-plane", category="Supervisor",
                     category_icon='fa-bold')
 
 
@@ -1185,28 +1186,28 @@ appbuilder.add_view(Setting_updateView, "Update Setting (Excel)",
 appbuilder.add_view(MultipleViewsExp, "Smart Settings",
                     icon="fa-cogs", category="Settings",
                     category_icon='fa-cubes')
-appbuilder.add_view(UnitView, "Lista Unit",
+appbuilder.add_view(UnitView, "Unit",
                     icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
-appbuilder.add_view(MaterialclassView, "Lista Material Class",
+appbuilder.add_view(MaterialclassView, "Material Class",
                     icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
-appbuilder.add_view(DoctypeView, "Lista DocType",
+appbuilder.add_view(DoctypeView, "DocType",
                     icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
-appbuilder.add_view(PartnerView, "Lista Partner",
+appbuilder.add_view(PartnerView, "Partner",
                     icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
-appbuilder.add_view(CdrlitemView, "Lista CDRL Item",
+appbuilder.add_view(CdrlitemView, "CDRL Item",
                     icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
-appbuilder.add_view(DocumentclassView, "Lista Document Class",
+appbuilder.add_view(DocumentclassView, "Document Class",
                     icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
-appbuilder.add_view(VendorView, "Lista Vendor",
+appbuilder.add_view(VendorView, "Vendor",
                     icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
-appbuilder.add_view(MrView, "Lista MR",
+appbuilder.add_view(MrView, "MR",
                     icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
 
