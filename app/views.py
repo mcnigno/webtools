@@ -498,7 +498,12 @@ class AskBapcoView(MultipleView):
 
 class UnitView(CompactCRUDMixin, ModelView):
     datamodel = SQLAInterface(Unit)
-    list_columns = ['unit','name', 'unit_type', 'description']
+    list_columns = ['unit', 'name', 'unit_type', 'description']
+
+    add_columns = ['unit', 'name', 'unit_type', 'start', 'stop']
+    edit_columns = ['unit', 'name', 'unit_type', 'start', 'stop']
+    show_columns = ['unit', 'name', 'unit_type', 'start', 'stop', 'description']
+    
     # list_widget = ListCarousel
     # label_columns = ['unit','description']
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
@@ -513,7 +518,11 @@ class UnitView(CompactCRUDMixin, ModelView):
 
 class MaterialclassView(ModelView):
     datamodel = SQLAInterface(Materialclass)
-    list_columns = ['materialclass','name', 'description']
+    list_columns = ['materialclass', 'name', 'description']
+    add_columns = ['materialclass', 'name', 'description']
+    edit_columns = ['materialclass', 'name', 'description']
+    show_columns = ['materialclass', 'name', 'description']
+    
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
     def muldelete(self, items):
         if isinstance(items, list):
@@ -527,6 +536,10 @@ class MaterialclassView(ModelView):
 class DoctypeView(ModelView):
     datamodel = SQLAInterface(Doctype)
     list_columns = ['doctype', 'name', 'description']
+
+    add_columns = ['doctype', 'name', 'description']
+    edit_columns = ['doctype', 'name', 'description']
+    show_columns = ['doctype', 'name', 'description']
     
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
     def muldelete(self, items):
@@ -540,7 +553,12 @@ class DoctypeView(ModelView):
 
 class PartnerView(ModelView):
     datamodel = SQLAInterface(Partner)
-    list_columns = ['partner','common_start','common_stop', 'description']
+    list_columns = ['partner', 'common_start', 'common_stop', 'description']
+
+    add_columns = ['partner', 'name', 'common_start', 'common_stop', 'description']
+    edit_columns = ['partner', 'name', 'description']
+    show_columns = ['partner', 'name', 'description']
+
     list_widget = ListThumbnail
 
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
@@ -557,6 +575,10 @@ class CdrlitemView(ModelView):
     datamodel = SQLAInterface(Cdrlitem)
     list_columns = ['cdrlitem', 'name', 'description']
 
+    add_columns = ['cdrlitem', 'name', 'description']
+    edit_columns = ['cdrlitem', 'name', 'description']
+    show_columns = ['cdrlitem', 'name', 'description']
+
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
     def muldelete(self, items):
         if isinstance(items, list):
@@ -570,6 +592,10 @@ class CdrlitemView(ModelView):
 class DocumentclassView(ModelView):
     datamodel = SQLAInterface(Documentclass)
     list_columns = ['documentclass','name', 'description']
+
+    add_columns = ['documentclass', 'name', 'description']
+    edit_columns = ['documentclass', 'name', 'description']
+    show_columns = ['documentclass', 'name', 'description']
 
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
     def muldelete(self, items):
@@ -585,6 +611,10 @@ class VendorView(ModelView):
     datamodel = SQLAInterface(Vendor)
     list_columns = ['vendor', 'description']
 
+    add_columns = ['vendor', 'name', 'description']
+    edit_columns = ['vendor', 'name', 'description']
+    show_columns = ['vendor', 'name', 'description']
+
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
     def muldelete(self, items):
         if isinstance(items, list):
@@ -597,7 +627,11 @@ class VendorView(ModelView):
 
 class MrView(ModelView):
     datamodel = SQLAInterface(Mr)
-    #list_columns = ['mr', 'description']
+    list_columns = ['mr', 'name', 'description']
+
+    add_columns = ['mr', 'name', 'description']
+    edit_columns = ['mr', 'name', 'description']
+    show_columns = ['mr', 'name', 'description']
 
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
     def muldelete(self, items):
