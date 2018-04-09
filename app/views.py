@@ -830,6 +830,7 @@ def allowed_file(filename):
 class PartnerRequestView(MasterDetailView):
     datamodel = SQLAInterface(Partner)
     related_views = [ListRequest]
+    value_columns = ['name']
 
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
     def muldelete(self, items):
