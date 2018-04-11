@@ -139,7 +139,9 @@ def bapco(self, item):
                                      # item.sheet,
                                      str(item.partner)
                                      ))
+    
     else:
+
         item_matrix = str.join('-', (str(item.unit),
                                      str(item.materialclass),
                                      str(item.doctype),
@@ -201,7 +203,7 @@ def bapco(self, item):
         else:
             # Create a new Matrix for standard units
             datamodel = SQLAInterface(Matrix, session=session)
-            matrix = Matrix(matrix=item_matrix)
+            matrix = Matrix(counter=result.start + 1, matrix=item_matrix)
             datamodel.add(matrix)
 
             # Add new Doc with quantity 1
