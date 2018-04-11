@@ -209,7 +209,7 @@ class PendingView(ModelView):
             codes_list = []
             for item in items:
                 print('item', item.code)
-                codes_list.append([item.code])
+                codes_list.append([item.code, item.oldcode])
             filename = codes_to_xlsx(codes_list)
 
             self.update_redirect()
