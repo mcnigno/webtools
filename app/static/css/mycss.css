@@ -42,3 +42,36 @@ body {
     background-image: linear-gradient(#e9242d, #e9242d 60%, #e9242d);
 
 }
+.panel-primary>.panel-heading {
+    color: #ffffff;
+    background-color: #4b1f68;
+    border-color: #3c1953;
+}
+.panel-primary {
+    border-color: #4b1f68;
+}
+
+.btn-primary {
+    color: #ffffff;
+    background-color: #4b1f68;
+    border-color: #3c1953;
+}
+.pagination>.active>span:focus {
+    
+    background-color: #4b1f68;
+    border-color: transparent;
+
+}
+
+.pagination>.active>a, .pagination>.active>span, .pagination>.active>a:hover, .pagination>.active>span:hover, .pagination>.active>a:focus, .pagination>.active>span:focus {
+    z-index: 3;
+    color: #ffffff;
+    background-color: #008cba;
+    border-color: transparent;
+    cursor: default;
+}
+
+
+table {
+    font-size: 14px;
+}

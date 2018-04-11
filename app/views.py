@@ -288,7 +288,8 @@ class DocumentView(CompactCRUDMixin, ModelView):
     edit_title = 'Edit Code'
     show_title = 'Show Code'
 
-    list_columns = ['id', 'code_type', 'bapco_code', 'oldcode', 'created_by', 'created', 'status']
+    show_columns = ['id', 'code_type', 'bapco_code', 'oldcode', 'created_by', 'created', 'status']
+    list_columns = ['code_type', 'bapco_code', 'oldcode', 'created_by', 'created', 'status']
     edit_columns = ['oldcode']
     
     label_columns = {

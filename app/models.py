@@ -181,10 +181,10 @@ class DocRequests(AuditMixin, Model):
     def req_type(self):
         
         if self.request_type == 'vendor':
-            return Markup('<img border="0" src="/static/img/vendor.png" alt="W3Schools" width="24" height="24"> ' + self.request_type[0:3])
+            return Markup('<img border="0" src="/static/img/vendor.png" alt="W3Schools" width="24" height="24"> ')
             
         elif self.request_type == 'engineering':
-            return Markup('<img border="0" src="/static/img/engineering.png" alt="W3Schools" width="24" height="24"> ' + self.request_type[0:3])
+            return Markup('<img border="0" src="/static/img/engineering.png" alt="W3Schools" width="24" height="24"> ')
             
         else:
             return '#ND'
@@ -246,11 +246,11 @@ class Document(AuditMixin, Model):
 
     def status(self):
         if self.oldcode == 'empty':
-            return Markup('<img border="0" src="/static/img/pending.png" alt="W3Schools" width="16" height="16">'+' P')
+            return Markup('<img border="0" src="/static/img/pending.png" alt="W3Schools" width="16" height="16">'+' Pending')
         elif self.oldcode == 'void':
-            return Markup('<img border="0" src="/static/img/destroyed.png" alt="W3Schools" width="16" height="16">'+' D')
+            return Markup('<img border="0" src="/static/img/destroyed.png" alt="W3Schools" width="16" height="16">'+' Destroyed')
         else:
-            return Markup('<img border="0" src="/static/img/reserved.png" alt="W3Schools" width="16" height="16">'+' R')
+            return Markup('<img border="0" src="/static/img/reserved.png" alt="W3Schools" width="16" height="16">'+' Reserved')
 
     def code_type(self):
         return self.docrequests.req_type()
@@ -270,13 +270,13 @@ class Document(AuditMixin, Model):
     
     def bapco_code(self):
         if self.oldcode == 'empty':
-            return Markup('<span style="color:#f89406">[ '+'<span style="color:white">'+ self.code + '<span style="color:#f89406"> ]')
+            return Markup('<span style="color:#f89406">[ '+'<span style="color:#4b1f68">'+ self.code + '<span style="color:#f89406"> ]')
         
         elif self.oldcode == 'void':
-            return Markup('<span style="color:#ee5f5b">[ '+'<span style="color:white">'+ self.code + '<span style="color:#ee5f5b"> ]')
+            return Markup('<span style="color:#ee5f5b">[ '+'<span style="color:#4b1f68">'+ self.code + '<span style="color:#ee5f5b"> ]')
 
         else:
-            return Markup('<span style="color:#5bc0de">[ '+'<span style="color:white">'+ self.code + '<span style="color:#5bc0de"> ]') 
+            return Markup('<span style="color:#5bc0de">[ '+'<span style="color:#4b1f68">'+ self.code + '<span style="color:#5bc0de"> ]') 
 
 
 class Comments(Model):
