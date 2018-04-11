@@ -200,6 +200,7 @@ class PendingView(ModelView):
         'status': 'Status',
         'oldcode': 'Contractor Code',
         'code': 'Bapco Code',
+        'code_type': 'Type',
     }
     
     @action("export", "Export","", "fa-table")
@@ -301,6 +302,7 @@ class DocumentView(CompactCRUDMixin, ModelView):
         'oldcode': 'Contractor Code',
         'code': 'Bapco Code',
         'code_type': 'Type',
+        
     }
     '''
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
@@ -346,9 +348,12 @@ class VendorRequestsView(ModelView):
         'cdrlitem': 'CDRL Item',
         'documentclass': 'Doc Class',
         'partner': 'Partner',
-        'quantity': 'Doc Qty',
+        'quantity': 'Qty',
         'request_type': 'Type',
-        'csv': 'XLS'
+        'csv': 'XLS',
+        'req_type': 'Type',
+        'req_description': 'Description',
+        'created': 'Created on'
     }
     
     related_views = [DocumentView]
@@ -374,17 +379,10 @@ class VendorRequestsView(ModelView):
     related_views = [DocumentView]
     # list_widget = ListThumbnail
     title = "Bapco Vendor Code Request"
-    search_columns = ['created_by']
+    #search_columns = ['created_by']
     
-    label_columns = {
-        'csv': 'XLS',
-        'req_type': 'Type',
-        'req_description': 'Description',
-        'created': 'Created on'
-
-    }
     
-    list_columns = ['req_type', 'req_description', 'created', 'csv']
+    list_columns = ['req_type', 'quantity', 'req_description', 'created_by', 'created']
     
     edit_columns = ['unit', 'materialclass', 'doctype', 'cdrlitem',
                     'documentclass', 'partner', 'vendor', 'mr', ]
@@ -452,8 +450,13 @@ class DocRequestsView(ModelView):
         'cdrlitem': 'CDRL Item',
         'documentclass': 'Doc Class',
         'partner': 'Partner',
-        'quantity': 'Doc Qty',
-        'csv': 'XLS'
+        'quantity': 'Qty',
+        
+        'csv': 'XLS',
+        'req_type': 'Type',
+        'req_description': 'Description',
+        'created': 'Created on',
+        
 
     }
     base_order = ('id', 'desc')
@@ -472,17 +475,10 @@ class DocRequestsView(ModelView):
     related_views = [DocumentView]
     # list_widget = ListThumbnail
     title = "Bapco Engineering Code Request"
-    search_columns = ['created_by', 'created_on']
+    #search_columns = ['created_by', 'created_on']
     
-    label_columns = {
-        'csv': 'XLS',
-        'req_type': 'Type',
-        'req_description': 'Description',
-        'created': 'Created on'
-
-    }
     
-    list_columns = ['req_type', 'req_description', 'created', 'csv']
+    list_columns = ['req_type', 'quantity', 'req_description', 'created_by', 'created']
     
     edit_columns = ['unit', 'materialclass', 'doctype', 'cdrlitem',
                     'documentclass', 'partner']

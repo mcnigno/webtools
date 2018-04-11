@@ -193,8 +193,8 @@ class DocRequests(AuditMixin, Model):
     def req_description(self):
         req_code = str(self.unit) + ' '+ str(self.materialclass.materialclass) + ' '+  str(self.doctype)
         req_quantity = str(self.quantity)
-        desc_eng = 'Request by ' +'<strong>'+ str(self.created_by) +'</strong>' + ' for '+'<span style="color:#f89406">[ ' +'</span><strong>'+ req_quantity +'</strong>'+ '<span style="color:#f89406">'+ ' ] </span>' + '</span></strong>'+ req_code
-        desc_vend = 'Request by ' +'<strong>'+ str(self.created_by) +'</strong>' + ' for '+'<span style="color:#f89406">[ ' +'</span><strong>'+ req_quantity +'</strong>'+ '<span style="color:#f89406">'+ ' ] </span>' + '</span></strong>'+ req_code  + ' | <span style="color:#5bc0de">'+ str(self.vendor)+'</span> -> '+ str(self.mr)+' |'
+        desc_eng = req_code
+        desc_vend = req_code  + ' | <span style="color:#4b1f68">'+ str(self.vendor)+'</span> -> '+ str(self.mr)+' |'
         
         if self.request_type == 'vendor':
             return Markup(desc_vend)
