@@ -165,19 +165,24 @@ def bapco(self, item):
     )
     matrix = db.session.query(Matrix).filter(Matrix.matrix == item_matrix).first()
     if matrix:
-        matrix.counter += 1
-        datamodel = SQLAInterface(Matrix, session=session)
-        datamodel.edit(matrix)
+        if matrix.counter + 1 <= result.stop:
+            matrix.counter += 1
+            datamodel = SQLAInterface(Matrix, session=session)
+            datamodel.edit(matrix)
 
-        item.matrix_id = matrix.id
-        code = item_serial + "-" + str(matrix.counter).zfill(5) + "-" + item.sheet
+            item.matrix_id = matrix.id
+            code = item_serial + "-" + str(matrix.counter).zfill(5) + "-" + item.sheet
 
-        datamodel = SQLAInterface(Document, session=session)
-        doc = Document(docrequests_id=item.id, code=code)
-        datamodel.add(doc)
+            datamodel = SQLAInterface(Document, session=session)
+            doc = Document(docrequests_id=item.id, code=code)
+            datamodel.add(doc)
 
-        message = 'Your code is ' + code
-        flash(message, category='info')
+            message = 'Your code is ' + code
+            flash(message, category='info')
+        else:
+            flash('No more Numbers available for this combination.', category='warning')
+        
+            
     else:
         # Create a New Matrix for common units
         if result.unit_type == 'common':
@@ -200,15 +205,17 @@ def bapco(self, item):
             datamodel.add(doc)
             message = 'Your code is ' + code
             flash(message, category='info')
+        
         else:
             # Create a new Matrix for standard units
+            
             datamodel = SQLAInterface(Matrix, session=session)
             matrix = Matrix(counter=result.start + 1, matrix=item_matrix)
-            datamodel.add(matrix)
+            datamodel.add(matrix)          
 
             # Add new Doc with quantity 1
             datamodel = SQLAInterface(Document, session=session)
-            code = item_serial + "-" + "1".zfill(5) + "-" + item.sheet
+            code = item_serial + "-" + str(result.start + 1).zfill(5) + "-" + item.sheet
             doc = Document(docrequests_id=item.id, code=code)
 
             datamodel.add(doc)
