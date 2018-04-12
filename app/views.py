@@ -230,7 +230,7 @@ class SuperDocumentView(CompactCRUDMixin, ModelView):
     
     base_order = ('id', 'desc')
     #base_filters = [['created_by', FilterEqualFunction, get_user]]
-    base_permissions = ['can_list', 'can_show', 'can_edit'] 
+    base_permissions = ['can_list', 'can_show', 'can_edit', 'can_delete'] 
 
     edit_title = 'Edit Code'
     show_title = 'Show Code'
