@@ -234,6 +234,7 @@ class SuperDocumentView(CompactCRUDMixin, ModelView):
 
     edit_title = 'Edit Code'
     show_title = 'Show Code'
+    show_exclude_columns = 'docrequests'
 
     list_columns = ['id', 'code_type', 'bapco_code', 'oldcode', 'created_by', 'created', 'status']
     edit_columns = ['oldcode']
