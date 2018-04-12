@@ -823,8 +823,8 @@ class ListRequest(ModelView):
 
     list_title = 'All Requests'
     add_title = 'Add new Request'
-    edit_title = 'Modifica Richiesta Codifica'
-    show_title = 'Vista Richiesta Codifica'
+    edit_title = 'Edit Code Request'
+    show_title = 'View Code Request'
     related_views = [DocumentView]
 
     show_template = 'appbuilder/general/model/show_cascade.html'
@@ -849,7 +849,7 @@ class ListRequest(ModelView):
 
     add_fieldsets = [
                         (
-                            'Numero di Codifiche richiesto',
+                            'Quantity',
                             {'fields': ['quantity']}
                         ),
                         (
@@ -870,7 +870,7 @@ class ListRequest(ModelView):
                             {'fields': ['unit',
                                         'materialclass',
                                         'doctype',
-                                        'partner'], 'expanded':True}
+                                    'partner'], 'expanded':True}
                         ),
                      ]
 
@@ -882,8 +882,8 @@ class SuperListRequest(ModelView):
 
     list_title = 'Supervisor - All Requests'
     add_title = 'Add new Request'
-    edit_title = 'Modifica Richiesta Codifica'
-    show_title = 'Vista Richiesta Codifica'
+    edit_title = 'Edit Code Request'
+    show_title = 'View Code Request' 
     related_views = [DocumentView]
 
     show_template = 'appbuilder/general/model/show_cascade.html'
@@ -908,7 +908,7 @@ class SuperListRequest(ModelView):
 
     add_fieldsets = [
                         (
-                            'Numero di Codifiche richiesto',
+                            'Quantity',
                             {'fields': ['quantity']}
                         ),
                         (
