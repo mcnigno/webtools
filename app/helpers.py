@@ -456,7 +456,14 @@ def codes_to_xlsx(codes_list):
     col = 0
     print(tuple(codes_list))
     #worksheet.write(0,0,'something')
-    t_list = tuple(codes_list)
+    #t_list = tuple(codes_list)
+    t_list = codes_list
+    
+    #print('*********', t_list)
+    if isinstance(t_list, list):
+        t_list = tuple(codes_list)
+    else:
+        t_list = codes_list
     for code in (t_list):
         print('Looping colist', code, row)
         worksheet.write(row, col, str(code[0]))
