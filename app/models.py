@@ -278,6 +278,10 @@ class Document(AuditMixin, Model):
         else:
             return Markup('<span style="color:#5bc0de">[ '+'<span style="color:#4b1f68">'+ self.code + '<span style="color:#5bc0de"> ]') 
 
+    def cdrl_item(self):
+        if self.docrequests.cdrlitem:
+            return self.docrequests.cdrlitem
+        return ''
 
 class Comments(Model):
     __tablename__ = "comments"
