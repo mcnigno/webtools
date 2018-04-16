@@ -119,16 +119,33 @@ def adddoc3(self, item):
 def bapco(self, item):
     # Set the DB session
     session = db.session
+
+    # Set tehe Document item
+    print('document setting', item.unit_id, item.materialclass_id, item.doctype_id, item.partner_id)
+
+    doc = Document(unit_id=item.unit_id, materialclass_id=item.materialclass_id,
+                   doctype_id=item.doctype_id, partner_id=item.partner_id)
     
+    print('document setted')
+    if item.documentclass:
+        doc.documentclass_id = item.documentclass_id
+    
+    if item.cdrlitem:
+        doc.cdrlitem_id = item.cdrl_id
+
     # Set the Request type
     if item.vendor and item.mr:
         item.request_type = 'vendor'
+        doc.vendor_id = item.vendor_id
+        doc.mr_id = item.mr_id
+
     else:
         item.request_type = 'engineering'
     
     # Set item_matrix based on unit type
     result = db.session.query(Unit).filter(Unit.unit == str(item.unit)).first()
     
+
     if str(result.unit_type) == 'common':
         print('Match unit type common Found')
 
@@ -163,18 +180,25 @@ def bapco(self, item):
                                      str(item.partner)
                                      )
     )
+    
     matrix = db.session.query(Matrix).filter(Matrix.matrix == item_matrix).first()
+    partner = db.session.query(Partner).filter(Partner.partner == str(item.partner)).first()
+           
     if matrix:
-        if matrix.counter + 1 <= result.stop:
+        if matrix.counter + 1 <= result.stop or matrix.counter + 1 <= partner.common_stop:
             matrix.counter += 1
             datamodel = SQLAInterface(Matrix, session=session)
             datamodel.edit(matrix)
 
             item.matrix_id = matrix.id
+            doc.matrix_id = matrix.id
             code = item_serial + "-" + str(matrix.counter).zfill(5) + "-" + item.sheet
 
             datamodel = SQLAInterface(Document, session=session)
-            doc = Document(docrequests_id=item.id, code=code)
+            
+            doc.docrequests_id = item.id
+            doc.code = code
+        
             datamodel.add(doc)
 
             message = 'Your code is ' + code
@@ -194,14 +218,20 @@ def bapco(self, item):
             matrix = Matrix(counter=partner.common_start + 1, matrix=str(item_matrix))
             datamodel = SQLAInterface(Matrix, session=session)
             datamodel.add(matrix)
-        
+
+            matrix = db.session.query(Matrix).filter(Matrix.matrix == item_matrix).first()
+
 
             # Add new Doc with quantity partner common start + 1
             datamodel = SQLAInterface(Document, session=session)
             
             code = item_serial + "-" + str(partner.common_start + 1).zfill(5) + "-" + item.sheet
             
-            doc = Document(docrequests_id=item.id, code=code)
+            #doc = Document(docrequests_id=item.id, code=code)
+            doc.matrix_id = matrix.id
+            doc.docrequests_id = item.id
+            doc.code = code
+
             datamodel.add(doc)
             message = 'Your code is ' + code
             flash(message, category='info')
@@ -211,12 +241,18 @@ def bapco(self, item):
             
             datamodel = SQLAInterface(Matrix, session=session)
             matrix = Matrix(counter=result.start + 1, matrix=item_matrix)
-            datamodel.add(matrix)          
+            datamodel.add(matrix)  
+
+            matrix = db.session.query(Matrix).filter(Matrix.matrix == item_matrix).first()
+        
 
             # Add new Doc with quantity 1
             datamodel = SQLAInterface(Document, session=session)
             code = item_serial + "-" + str(result.start + 1).zfill(5) + "-" + item.sheet
-            doc = Document(docrequests_id=item.id, code=code)
+            #doc = Document(docrequests_id=item.id, code=code)
+            doc.matrix_id = matrix.id
+            doc.docrequests_id = item.id
+            doc.code = code
 
             datamodel.add(doc)
             message = 'Your code is ' + code
@@ -242,14 +278,20 @@ def init_bapco(self, item):
     req = DocRequests(unit_id=id_unit.id, materialclass_id=id_materialclass.id, 
                       doctype_id=id_doctype.id, partner_id=id_patner.id,
                       request_type=item.request_type)
+    
+    doc = Document(unit_id=id_unit.id, materialclass_id=id_materialclass.id,
+                   doctype_id=id_doctype.id, partner_id=id_patner.id)
 
     if item.cdrlitem_id:
         id_cdrlitem = db.session.query(Cdrlitem).filter(Cdrlitem.id == str(item.cdrlitem_id)).first()
         req.cdrlitem_id = id_cdrlitem.id
+        doc.cdrlitem_id = id_cdrlitem.id
         
     if item.documentclass_id:
         id_documentclass = db.session.query(Documentclass).filter(Documentclass.id == str(item.documentclass_id)).first()
         req.documentclass_id = id_documentclass.id
+        doc.documentclass_id = id_documentclass.id
+
     # Set the Request type
     if item.vendor and item.mr:
         req.request_type = 'vendor'
@@ -257,6 +299,9 @@ def init_bapco(self, item):
         id_mr = db.session.query(Mr).filter(Mr.id == str(item.mr_id)).first()
         req.vendor_id = id_vendor.id
         req.mr_id = id_mr.id
+
+        doc.vendor_id = id_vendor.id
+        doc.mr_id = id_mr.id
     
     else:
         req.request_type = 'engineering'
@@ -307,8 +352,9 @@ def init_bapco(self, item):
         
         datamodel = SQLAInterface(Document, session=session)
         
-        doc = Document(docrequests=req, code=code)
-        
+        #doc = Document(docrequests=req, code=code)
+        doc.docrequests = req
+        doc.code = code
         datamodel.add(doc)
 
         message = 'Your code is ' + code
@@ -335,8 +381,9 @@ def init_bapco(self, item):
             
             datamodel = SQLAInterface(Document, session=session)
             
-            doc = Document(docrequests=req, code=code)
-            
+            #doc = Document(docrequests=req, code=code)
+            doc.docrequests = req
+            doc.code = code
             
             datamodel.add(doc)
             
@@ -358,8 +405,10 @@ def init_bapco(self, item):
             
             datamodel = SQLAInterface(Document, session=session)
             
-            doc = Document(docrequests=req, code=code)   
-            
+            #doc = Document(docrequests=req, code=code)   
+            doc.docrequests = req
+            doc.code = code
+
             datamodel.add(doc)
             
             message = 'Your code is ' + code

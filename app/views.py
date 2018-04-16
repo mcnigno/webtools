@@ -189,8 +189,8 @@ class PendingView(ModelView):
     edit_title = 'Edit Code'
     show_title = 'Show Code'
     
-    list_columns = ['code_type', 'bapco_code', 'oldcode', 'created_by', 'created', 'status']
-    edit_columns = ['oldcode']
+    list_columns = ['code_type', 'bapco_code', 'oldcode_p', 'notes', 'created', 'status']
+    edit_columns = ['oldcode', 'notes']
     
     label_columns = {
         'id': 'ID',
@@ -199,6 +199,7 @@ class PendingView(ModelView):
         'changed_by': 'Modified By',
         'status': 'Status',
         'oldcode': 'Contractor Code',
+        'oldcode_p': 'Contractor Code',
         'code': 'Bapco Code',
         'code_type': 'Type',
     }
@@ -236,8 +237,8 @@ class SuperDocumentView(CompactCRUDMixin, ModelView):
     show_title = 'Show Code'
     show_exclude_columns = 'docrequests'
 
-    list_columns = ['id', 'code_type', 'bapco_code', 'oldcode', 'created_by', 'created', 'status']
-    edit_columns = ['oldcode']
+    list_columns = ['id', 'code_type', 'bapco_code', 'oldcode_p', 'created_by', 'created', 'status']
+    edit_columns = ['oldcode', 'notes']
     
     label_columns = {
         'id': 'ID',
@@ -285,7 +286,8 @@ class SuperDocumentView(CompactCRUDMixin, ModelView):
 # Vendor Form Request
 class VendorRequestsView(ModelView):
     datamodel = SQLAInterface(DocRequests)
-    default_view = 'list'
+    default_view = 'add'
+
     
     label_columns = {
         'id': 'ID',
@@ -306,13 +308,15 @@ class VendorRequestsView(ModelView):
     #related_views = [DocumentView]
     show_template = 'appbuilder/general/model/show_cascade.html'
     edit_template = 'appbuilder/general/model/edit_cascade.html'
-
+    
+    add_template = 'appbuilder/general/model/add_ven.html'
+    
     base_order = ('id', 'desc')
     
     base_filters = [['created_by', FilterEqualFunction, get_user],
                     ['request_type', FilterEqual, 'vendor']
                     ]
-    
+
     base_permissions = ['can_add','can_list','can_show'] 
     
     validators_columns = {'vendor': [DataRequired(message='NOT Released: Vendor is required')],
@@ -353,7 +357,7 @@ class VendorRequestsView(ModelView):
                                         'documentclass',
                                         'vendor',
                                         'mr',
-                                        'partner'], 'expanded':False}
+                                        'partner'], 'expanded':True}
                         ),
                      ]
     show_fieldsets = [
@@ -385,6 +389,17 @@ class VendorRequestsView(ModelView):
             print('SESSION LIST:', session_list)
         toxlsx(self, item, session_list)
 
+    @expose('/add', methods=['GET', 'POST'])
+    @has_access
+    def add(self):
+
+        widget = self._add()
+        if not widget:
+            return redirect(url_for('PendingView.list'))
+        else:
+            return self.render_template(self.add_template,
+                                        title=self.add_title,
+                                        widgets=widget)
 
 class AskBapcoView(MultipleView):
     datamodel = SQLAInterface(DocRequests)
@@ -540,6 +555,7 @@ class MrView(ModelView):
 
 class DocRequestsView(ModelView):
     datamodel = SQLAInterface(DocRequests)
+    default_view = 'add'
     
     label_columns = {
         'id': 'ID',
@@ -561,11 +577,13 @@ class DocRequestsView(ModelView):
     base_order = ('id', 'desc')
     base_filters = [['created_by', FilterEqualFunction, get_user],
                     ['request_type', FilterEqual, 'engineering']
-                    ]
+                    ] 
     base_permissions = ['can_add','can_list','can_show'] 
     #related_views = [DocumentView]
     show_template = 'appbuilder/general/model/show_cascade.html'
     edit_template = 'appbuilder/general/model/edit_cascade.html'
+
+    add_template = 'appbuilder/general/model/add_eng.html'
 
     list_title = 'Engineering Code Request'
     add_title = 'Add Engineering Code Request'
@@ -629,6 +647,7 @@ class DocRequestsView(ModelView):
         #choice_unit(self, item)
         print('after cHoice')
         session_list = []
+        
         for i in range(0, item.quantity):
             print('****** Engineering Code Released ******')
 
@@ -637,66 +656,24 @@ class DocRequestsView(ModelView):
             print(code)
             print('SESSION LIST:', session_list)
         #toxlsx(self, item, session_list)
-
-
-
-class DocumentView(CompactCRUDMixin, ModelView):
-    datamodel = SQLAInterface(Document)
-    list_title = 'Bapco Codes'
+        #redirect(url_for(PendingView))
     
-    base_order = ('id', 'desc')
-    base_filters = [['created_by', FilterEqualFunction, get_user]]
-    base_permissions = ['can_list', 'can_show', 'can_edit'] 
+    @expose('/add', methods=['GET', 'POST'])
+    @has_access
+    def add(self):
 
-    edit_title = 'Edit Code'
-    show_title = 'Show Code'
-
-    show_columns = ['id', 'code_type', 'bapco_code', 'oldcode', 'created_by', 'created', 'status']
-    list_columns = ['code_type', 'bapco_code', 'oldcode', 'created_by', 'created', 'status']
-    edit_columns = ['oldcode']
-
-    #search_columns = DocRequestsView.search_columns
-
-    label_columns = {
-        'id': 'ID',
-        'created': 'Created On',
-        'modified': 'Modified On',
-        'changed_by': 'Modified By',
-        'status': 'Status',
-        'oldcode': 'Contractor Code',
-        'code': 'Bapco Code',
-        'code_type': 'Type',
-        
-    }
-    '''
-    @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
-    def muldelete(self, items):
-        if isinstance(items, list):
-            self.datamodel.delete_all(items)
-            self.update_redirect()
+        widget = self._add()
+        if not widget:
+            return redirect(url_for('PendingView.list'))
         else:
-            self.datamodel.delete(items)
-        return redirect(self.get_redirect())
-    '''
-    @action("export", "Export", "", "fa-table")
-    def export(self, items):
-        print('Export from DocumentView')
-        if isinstance(items, list):
-            codes_list = []
-            for item in items:
-                print('item', item.code)
-                codes_list.append([item.code, item.oldcode])
-            filename = codes_to_xlsx(codes_list)
-            
-            self.update_redirect()
-            
-        else:
-            filename = codes_to_xlsx(items.code)
+            return self.render_template(self.add_template,
+                                        title=self.add_title,
+                                        widgets=widget)
+
         
-        #print(codes_list)
-        #redirect(self.get_redirect())
-        self.update_redirect()
-        return send_file('static/csv/' + filename, as_attachment=True)
+
+
+
 
 
 class MatrixView(ModelView):
@@ -704,19 +681,6 @@ class MatrixView(ModelView):
     list_columns = ['id', 'matrix', 'counter']
 
 
-class UserDocumentView(MasterDetailView):
-    datamodel = SQLAInterface(User)
-    related_views = [DocumentView]
-    value_columns = ['username']
-
-    @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
-    def muldelete(self, items):
-        if isinstance(items, list):
-            self.datamodel.delete_all(items)
-            self.update_redirect()
-        else:
-            self.datamodel.delete(items)
-        return redirect(self.get_redirect())
 
 
 class MultipleViewsExp(MultipleView):
@@ -821,141 +785,13 @@ class TimelineChart(GroupByChartView):
         }
     ]
 
-class ListRequest(ModelView):
-    datamodel = SQLAInterface(DocRequests)
-    base_order = ('id', 'desc')
-    base_filters = [['created_by', FilterEqualFunction, get_user]]
-    base_permissions = ['can_list', 'can_show'] 
-
-    list_title = 'All Requests'
-    add_title = 'Add new Request'
-    edit_title = 'Edit Code Request'
-    show_title = 'View Code Request'
-    related_views = [DocumentView]
-
-    show_template = 'appbuilder/general/model/show_cascade.html'
-    edit_template = 'appbuilder/general/model/edit_cascade.html'
-    
-    #list_widget = ListThumbnail
-
-    title = "Bapco Document ID Generator"
-    label_columns = {
-        'csv': 'XLS',
-        'req_type': 'Type',
-        'req_description': 'Description',
-        'created': 'Created on'
-
-    }
-    
-    list_columns = ['req_type', 'req_description', 'created', 'csv']
-    edit_columns = ['unit', 'materialclass', 'doctype', 'partner']
 
 
-    add_exclude_columns = ['id', 'matrix']
-
-    add_fieldsets = [
-                        (
-                            'Quantity',
-                            {'fields': ['quantity']}
-                        ),
-                        (
-                            'Bapco Document Setting',
-                            {'fields': ['unit',
-                                        'materialclass',
-                                        'doctype',
-                                        'partner'], 'expanded':True}
-                        ),
-                     ]
-    show_fieldsets = [
-                        (
-                            'Number of Bapco IDs',
-                            {'fields': ['quantity']}
-                        ),
-                        (
-                            'Bapco Document',
-                            {'fields': ['unit',
-                                        'materialclass',
-                                        'doctype',
-                                    'partner'], 'expanded':True}
-                        ),
-                     ]
-
-class SuperListRequest(ModelView):
-    datamodel = SQLAInterface(DocRequests)
-    base_order = ('id', 'desc')
-    #base_filters = [['created_by', FilterEqualFunction, get_user]]
-    base_permissions = ['can_list', 'can_show'] 
-
-    list_title = 'Supervisor - All Requests'
-    add_title = 'Add new Request'
-    edit_title = 'Edit Code Request'
-    show_title = 'View Code Request' 
-    related_views = [DocumentView]
-
-    show_template = 'appbuilder/general/model/show_cascade.html'
-    edit_template = 'appbuilder/general/model/edit_cascade.html'
-    
-    #list_widget = ListThumbnail
-
-    title = "Bapco Document ID Generator"
-    label_columns = {
-        'csv': 'XLS',
-        'req_type': 'Type',
-        'req_description': 'Description',
-        'created': 'Created on'
-
-    }
-    
-    list_columns = ['req_type', 'req_description', 'created', 'csv']
-    edit_columns = ['unit', 'materialclass', 'doctype', 'partner']
-
-
-    add_exclude_columns = ['id', 'matrix']
-
-    add_fieldsets = [
-                        (
-                            'Quantity',
-                            {'fields': ['quantity']}
-                        ),
-                        (
-                            'Bapco Document Setting',
-                            {'fields': ['unit',
-                                        'materialclass',
-                                        'doctype',
-                                        'partner'], 'expanded':True}
-                        ),
-                     ]
-    show_fieldsets = [
-                        (
-                            'Number of Bapco IDs',
-                            {'fields': ['quantity']}
-                        ),
-                        (
-                            'Bapco Document',
-                            {'fields': ['unit',
-                                        'materialclass',
-                                        'doctype',
-                                        'partner'], 'expanded':True}
-                        ),
-                     ]
 
 def allowed_file(filename):
         return '.' in filename and \
             filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-class PartnerRequestView(MasterDetailView):
-    datamodel = SQLAInterface(Partner)
-    related_views = [SuperListRequest]
-    value_columns = ['name']
-
-    @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
-    def muldelete(self, items):
-        if isinstance(items, list):
-            self.datamodel.delete_all(items)
-            self.update_redirect()
-        else:
-            self.datamodel.delete(items)
-        return redirect(self.get_redirect())
 
 class Setting_updateView(BaseView):
     default_view = 'upload_setting'
@@ -1241,11 +1077,215 @@ class Uploadcodes(BaseView):
 
 class CommentsView(ModelView):
     datamodel = SQLAInterface(Comments)
-
+    list_columns = ['doc','comment', 'created_by', 'created', 'changed_by', 'modified']
+    add_columns = ['doc', 'comment']
+    show_columns = ['doc', 'comment', 'created_by', 'created', 'changed_by', 'modified']
+    edit_columns = ['comment']
+    
 @appbuilder.app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html', base_template=appbuilder.base_template,
                            appbuilder=appbuilder), 404
+
+class DocumentView(CompactCRUDMixin, ModelView):
+    datamodel = SQLAInterface(Document)
+    list_title = 'Bapco Codes'
+    related_views = [CommentsView]
+    
+    
+    base_order = ('id', 'desc')
+    base_filters = [['created_by', FilterEqualFunction, get_user]]
+    base_permissions = ['can_list', 'can_show', 'can_edit'] 
+
+    edit_title = 'Edit Code'
+    show_title = 'Show Code'
+
+    
+    #show_columns = ['id', 'code_type', 'bapco_code', 'oldcode', 'created_by', 'created', 'status']
+    list_columns = ['code_type', 'bapco_code', 'oldcode_p','notes', 'created', 'status']
+    edit_columns = ['oldcode', 'notes']
+
+    #search_columns = DocRequestsView.search_columns
+
+    label_columns = {
+        'id': 'ID',
+        'created': 'Created On',
+        'modified': 'Modified On',
+        'changed_by': 'Modified By',
+        'status': 'Status',
+        'oldcode': 'Contractor Code',
+        'oldcode_p': 'Contractor Code',
+        'code': 'Bapco Code',
+        'code_type': 'Type',
+        
+    }
+   
+    @action("export", "Export", "", "fa-table")
+    def export(self, items):
+        print('Export from DocumentView')
+        if isinstance(items, list):
+            codes_list = []
+            for item in items:
+                print('item', item.code)
+                codes_list.append([item.code, item.oldcode])
+            filename = codes_to_xlsx(codes_list)
+            
+            self.update_redirect()
+            
+        else:
+            filename = codes_to_xlsx(items.code)
+        
+        #print(codes_list)
+        #redirect(self.get_redirect())
+        self.update_redirect()
+        return send_file('static/csv/' + filename, as_attachment=True)
+
+class UserDocumentView(MasterDetailView):
+    datamodel = SQLAInterface(User)
+    related_views = [DocumentView]
+    value_columns = ['username']
+
+    @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
+    def muldelete(self, items):
+        if isinstance(items, list):
+            self.datamodel.delete_all(items)
+            self.update_redirect()
+        else:
+            self.datamodel.delete(items)
+        return redirect(self.get_redirect())
+
+class ListRequest(ModelView):
+    datamodel = SQLAInterface(DocRequests)
+    base_order = ('id', 'desc')
+    base_filters = [['created_by', FilterEqualFunction, get_user]]
+    base_permissions = ['can_list', 'can_show'] 
+
+    list_title = 'All Requests'
+    add_title = 'Add new Request'
+    edit_title = 'Edit Code Request'
+    show_title = 'View Code Request'
+    related_views = [DocumentView]
+
+    show_template = 'appbuilder/general/model/show_cascade.html'
+    edit_template = 'appbuilder/general/model/edit_cascade.html'
+    
+    #list_widget = ListThumbnail
+
+    title = "Bapco Document ID Generator"
+    label_columns = {
+        'csv': 'XLS',
+        'req_type': 'Type',
+        'req_description': 'Description',
+        'created': 'Created on'
+
+    }
+    
+    list_columns = ['req_type', 'req_description', 'created', 'csv']
+    edit_columns = ['unit', 'materialclass', 'doctype', 'partner']
+
+
+    add_exclude_columns = ['id', 'matrix']
+
+    add_fieldsets = [
+                        (
+                            'Quantity',
+                            {'fields': ['quantity']}
+                        ),
+                        (
+                            'Bapco Document Setting',
+                            {'fields': ['unit',
+                                        'materialclass',
+                                        'doctype',
+                                        'partner'], 'expanded':True}
+                        ),
+                     ]
+    show_fieldsets = [
+                        (
+                            'Number of Bapco IDs',
+                            {'fields': ['quantity']}
+                        ),
+                        (
+                            'Bapco Document',
+                            {'fields': ['unit',
+                                        'materialclass',
+                                        'doctype',
+                                    'partner'], 'expanded':True}
+                        ),
+                     ]
+
+class SuperListRequest(ModelView):
+    datamodel = SQLAInterface(DocRequests)
+    base_order = ('id', 'desc')
+    #base_filters = [['created_by', FilterEqualFunction, get_user]]
+    base_permissions = ['can_list', 'can_show'] 
+
+    list_title = 'Supervisor - All Requests'
+    add_title = 'Add new Request'
+    edit_title = 'Edit Code Request'
+    show_title = 'View Code Request' 
+    related_views = [DocumentView]
+
+    show_template = 'appbuilder/general/model/show_cascade.html'
+    edit_template = 'appbuilder/general/model/edit_cascade.html'
+    
+    #list_widget = ListThumbnail
+
+    title = "Bapco Document ID Generator"
+    label_columns = {
+        'csv': 'XLS',
+        'req_type': 'Type',
+        'req_description': 'Description',
+        'created': 'Created on'
+
+    }
+    
+    list_columns = ['req_type', 'req_description', 'created', 'csv']
+    edit_columns = ['unit', 'materialclass', 'doctype', 'partner']
+
+
+    add_exclude_columns = ['id', 'matrix']
+
+    add_fieldsets = [
+                        (
+                            'Quantity',
+                            {'fields': ['quantity']}
+                        ),
+                        (
+                            'Bapco Document Setting',
+                            {'fields': ['unit',
+                                        'materialclass',
+                                        'doctype',
+                                        'partner'], 'expanded':True}
+                        ),
+                     ]
+    show_fieldsets = [
+                        (
+                            'Number of Bapco IDs',
+                            {'fields': ['quantity']}
+                        ),
+                        (
+                            'Bapco Document',
+                            {'fields': ['unit',
+                                        'materialclass',
+                                        'doctype',
+                                        'partner'], 'expanded':True}
+                        ),
+                     ]
+
+class PartnerRequestView(MasterDetailView):
+    datamodel = SQLAInterface(Partner)
+    related_views = [SuperListRequest]
+    value_columns = ['name']
+
+    @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
+    def muldelete(self, items):
+        if isinstance(items, list):
+            self.datamodel.delete_all(items)
+            self.update_redirect()
+        else:
+            self.datamodel.delete(items)
+        return redirect(self.get_redirect())
+
 
 ## Flask migrate with Alembic instead of this
 db.create_all()
@@ -1260,6 +1300,9 @@ appbuilder.add_view(Oldcodes, "Old Codes Upload",
                     icon="fa-paper-plane", category="Supervisor",
                     category_icon='fa-bold')
 
+appbuilder.add_view(CommentsView, "Comments",
+                    icon="fa-paper-plane", category="Supervisor",
+                    category_icon='fa-bold')
 
 
 #appbuilder.add_view_no_menu(DocRequestsView)

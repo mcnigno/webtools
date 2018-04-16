@@ -1,6 +1,6 @@
 from flask_appbuilder import Model
 from flask_appbuilder.models.mixins import AuditMixin
-from sqlalchemy import Column, Integer, String, ForeignKey  
+from sqlalchemy import Column, Integer, String, ForeignKey 
 from sqlalchemy.orm import relationship
 from time import gmtime, strftime
 from flask import Markup
@@ -116,8 +116,8 @@ class Matrix(Model):
     id = Column(Integer, primary_key=True)
     matrix = Column(String(50))
     counter = Column(Integer, default=1)
-    document_id = Column(Integer, ForeignKey("document.id"))
-    document = relationship('Document')
+    #document_id = Column(Integer, ForeignKey("document.id"))
+    #document = relationship('Document')
     
     def __repr__(self):
         return self.matrix
@@ -152,7 +152,7 @@ class DocRequests(AuditMixin, Model):
     def __repr__(self):
         doc_param = "-".join([str(x) for x in [self.unit, self.materialclass, self.doctype]])
 
-        return '[ '+ str(self.quantity) +' ] '+ doc_param + ' by ' + str(self.created_by) + ' on ' + str(self.created())
+        return '[ '+ str(self.quantity) +' ] '+ doc_param + ' by ' + str(self.created_by) + ' on ' + Markup(self.created_on) 
     
     # def __init__(self):
     def csv(self):
@@ -177,17 +177,17 @@ class DocRequests(AuditMixin, Model):
         date = self.created_on
         #return date.strftime('We are the %d, %b %Y')
         return self.changed_on.strftime('%d, %b %Y - %H:%M:%S')
-    
+
     def req_type(self):
-        
-        if self.request_type == 'vendor':
-            return Markup('<img border="0" src="/static/img/vendor.png" alt="W3Schools" width="24" height="24"> ')
+
+        if self.request_type == 'vendor':  
+            return Markup('<img border="0" src="/static/img/vendor.png" alt="W3Schools" width="24" height="24"> ') 
             
         elif self.request_type == 'engineering':
             return Markup('<img border="0" src="/static/img/engineering.png" alt="W3Schools" width="24" height="24"> ')
-            
+    
         else:
-            return '#ND'
+            return '#ND'    
         
     
     def req_description(self):
@@ -229,7 +229,7 @@ class DocRequests(AuditMixin, Model):
         return str(self.partner)
     
     
-    
+
 class Document(AuditMixin, Model):
     __tablename__ = "document"
     id = Column(Integer, primary_key=True)
@@ -237,12 +237,39 @@ class Document(AuditMixin, Model):
     oldcode = Column(String(35), default='empty')
     docrequests_id = Column(Integer, ForeignKey('docrequests.id'))
     docrequests = relationship(DocRequests)
-    comments = Column(String(150))
+    #comments = Column(String(150))
     notes = Column(String(150))
     status = Column(String(30))
 
+    unit_id = Column(Integer, ForeignKey('unit.id'), nullable=False)
+    unit = relationship('Unit')
+    materialclass_id = Column(Integer, ForeignKey('materialclass.id'), nullable=False)
+    materialclass = relationship('Materialclass')
+    doctype_id = Column(Integer, ForeignKey('doctype.id'), nullable=False)
+    doctype = relationship('Doctype')
+    sheet = Column(String(3), default='001')
+    partner_id = Column(Integer, ForeignKey('partner.id'), nullable=False)
+    partner = relationship('Partner')
+    cdrlitem_id = Column(Integer, ForeignKey('cdrlitem.id'))
+    cdrlitem = relationship('Cdrlitem')
+    documentclass_id = Column(Integer, ForeignKey('documentclass.id'))
+    documentclass = relationship('Documentclass')
+    vendor_id = Column(Integer, ForeignKey('vendor.id'))
+    vendor = relationship('Vendor')
+    mr_id = Column(Integer, ForeignKey('mr.id'))
+    mr = relationship('Mr')
+    matrix_id = Column(Integer, ForeignKey('matrix.id'))
+    matrix = relationship('Matrix')
+
+
+
     def __repr__(self):
         return self.code
+
+    def oldcode_p(self):
+        if self.oldcode == 'empty' or self.oldcode == 'void':
+            return ''
+        return self.oldcode
 
     def status(self):
         if self.oldcode == 'empty':
@@ -282,12 +309,28 @@ class Document(AuditMixin, Model):
         if self.docrequests.cdrlitem:
             return self.docrequests.cdrlitem
         return ''
+    
 
-class Comments(Model):
+
+
+class Comments(AuditMixin,Model):
     __tablename__ = "comments"
     id = Column(Integer, primary_key=True)
-    code = Column(String(35))
-    notes = Column(String(35))
-    rel = Column(String(30))
-    rel2 = Column(String(30))
+    doc_id = Column(Integer, ForeignKey('document.id'), nullable=False)
+    doc = relationship(Document)
+    comment = Column(String(250))
+    closed = Column(String(3), default='no')
+
+    def created(self):
+        date = self.created_on
+        #return date.strftime('We are the %d, %b %Y')
+        
+        #return Markup(_(momentjs(self.created_on).calendar() + ' | ' + momentjs(self.created_on).fromNow()))
+        #return self.created_on.strftime('%d, %b %Y - %H:%M:%S')
+        return Markup(momentjs(self.created_on).format('D MMM Y | LT'))
+    
+    def modified(self):
+        #date = self.created_on
+        #return date.strftime('We are the %d, %b %Y')
+        return self.changed_on.strftime('%d, %b %Y - %H:%M:%S')
 

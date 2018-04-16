@@ -39,8 +39,7 @@ body {
 }
 */
 .navbar-inverse {
-    background-image: linear-gradient(#e9242d, #e9242d 60%, #e9242d);
-
+    background-color: #4b1f68;
 }
 
 .pagination>.active>a, .pagination>.active>span, .pagination>.active>a:hover, .pagination>.active>span:hover, .pagination>.active>a:focus, .pagination>.active>span:focus {
@@ -55,3 +54,5 @@ body {
 table {
     font-size: 14px;
 }
+
+

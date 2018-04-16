@@ -1,0 +1,39 @@
+{% extends "appbuilder/base.html" %}
+{% import 'appbuilder/general/lib.html' as lib %}
+
+{% block content %}
+
+<h3><img border="0" src="/static/img/engineering.png" alt="W3Schools" width="48" height="48"> Engineering Request</h3>
+
+
+{{ lib.panel_begin(title) }}
+
+{% block add_form %}
+<div class="add_eng">
+<style media="screen" type="text/css">
+
+.panel-primary>.panel-heading {
+    color: #ffffff;
+    background-color: #db392d;
+    border-color: #c03a30;
+}
+.add_eng {
+    background-color: #e3574c
+}
+.panel-primary {
+    border-color: #c03a30;
+}
+h3, .h3 {
+    text-align: center;
+    font-size: 26px;
+}
+
+</style>
+
+    {{ widgets.get('add')(form_action=form_action)|safe }}
+</div>
+{% endblock %}
+
+{{ lib.panel_end() }}
+
+{% endblock %}
