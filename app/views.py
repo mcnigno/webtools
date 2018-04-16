@@ -290,7 +290,7 @@ class SuperDocumentView(CompactCRUDMixin, ModelView):
             print(item)
         return 'ex function called'
     
-    @has_access
+    
     @action("export_all", "Export ALL !", "", "fa-table")
     def export_all(self, items):
         session = db.session
