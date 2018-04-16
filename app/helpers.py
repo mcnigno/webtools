@@ -185,7 +185,7 @@ def bapco(self, item):
     partner = db.session.query(Partner).filter(Partner.partner == str(item.partner)).first()
            
     if matrix:
-        if matrix.counter 
+        if matrix.counter:
             #+ 1 <= result.stop or matrix.counter + 1 <= partner.common_stop:
             matrix.counter += 1
             datamodel = SQLAInterface(Matrix, session=session)
