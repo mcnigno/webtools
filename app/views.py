@@ -247,6 +247,7 @@ class SuperDocumentView(CompactCRUDMixin, ModelView):
         'changed_by': 'Modified By',
         'status': 'Status',
         'oldcode': 'Contractor Code',
+        'oldcode_p': 'Contractor Code',
         'code': 'Bapco Code',
         'code_type': 'Type',
     }
