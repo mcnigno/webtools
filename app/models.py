@@ -64,7 +64,7 @@ class Partner(Model):
     common_stop = Column(Integer, default=0)
     
     def __repr__(self):
-        return self.name
+        return self.partner
     
 
 class Documentclass(Model):
