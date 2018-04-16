@@ -27,13 +27,15 @@ import csv
 from app import app
 from flask_appbuilder.actions import action
 from flask_appbuilder import filemanager
-from flask import request
+from flask import request, url_for
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import ImmutableMultiDict
 import os
 from flask_appbuilder.security.sqla.models import User
 from .momentjs import momentjs
 from flask import Markup
+from .widgets import MyListWidget 
+from flask_appbuilder.widgets import FormHorizontalWidget, FormInlineWidget, FormWidget, FormVerticalWidget
 
 ALLOWED_EXTENSIONS = set(['xlsx'])
 
@@ -228,6 +230,7 @@ class PendingView(ModelView):
 class SuperDocumentView(CompactCRUDMixin, ModelView):
     datamodel = SQLAInterface(Document)
     list_title = 'Supervisor | Bapco Codes'
+    #list_widget = MyListWidget
     
     base_order = ('id', 'desc')
     #base_filters = [['created_by', FilterEqualFunction, get_user]]
@@ -263,6 +266,35 @@ class SuperDocumentView(CompactCRUDMixin, ModelView):
     '''
     @action("export", "Export", "", "fa-table")
     def export(self, items):
+        print('Export from DocumentView')
+        if isinstance(items, list):
+            codes_list = []
+            for item in items:
+                print('item', item.code)
+                codes_list.append([item.code, item.oldcode])
+            filename = codes_to_xlsx(codes_list)
+            
+            self.update_redirect()
+            
+        else:
+            filename = codes_to_xlsx(items.code)
+        
+        #print(codes_list)
+        #redirect(self.get_redirect())
+        self.update_redirect()
+        return send_file('static/csv/' + filename, as_attachment=True)
+    
+    @expose('/ex')
+    def ex(self):
+        for item in items:
+            print(item)
+        return 'ex function called'
+    
+    @has_access
+    @action("export_all", "Export ALL !", "", "fa-table")
+    def export_all(self, items):
+        session = db.session
+        items = session.query(Document).all()
         print('Export from DocumentView')
         if isinstance(items, list):
             codes_list = []
@@ -557,7 +589,7 @@ class MrView(ModelView):
 class DocRequestsView(ModelView):
     datamodel = SQLAInterface(DocRequests)
     default_view = 'add'
-    
+    #list_widget = ListBlock
     label_columns = {
         'id': 'ID',
         'unit': 'Unit',
@@ -591,7 +623,7 @@ class DocRequestsView(ModelView):
     edit_title = 'Edit Engineering Code Request'
     show_title = 'Show Engineering Code Request'
     #related_views = [DocumentView]
-    # list_widget = ListThumbnail
+    #list_widget = ListThumbnail
     title = "Bapco Engineering Code Request"
     #
     
