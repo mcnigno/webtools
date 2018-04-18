@@ -128,10 +128,12 @@ def bapco(self, item):
     
     print('document setted')
     if item.documentclass:
+        print('documentclass', item.documentclass, item.documentclass_id )
         doc.documentclass_id = item.documentclass_id
     
     if item.cdrlitem:
-        doc.cdrlitem_id = item.cdrl_id
+        print('cdrlitem', item.cdrlitem, item.cdrlitem_id )
+        doc.cdrlitem_id = item.cdrlitem_id
 
     # Set the Request type
     if item.vendor and item.mr:
