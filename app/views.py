@@ -1252,7 +1252,9 @@ class SuperListRequest(ModelView):
     datamodel = SQLAInterface(DocRequests)
     base_order = ('id', 'desc')
     #base_filters = [['created_by', FilterEqualFunction, get_user]]
-    base_permissions = ['can_list', 'can_show'] 
+    base_permissions = ['can_list', 'can_show','can_delete'] 
+
+    
 
     list_title = 'Supervisor - All Requests'
     add_title = 'Add new Request'
