@@ -242,7 +242,7 @@ class SuperDocumentView(CompactCRUDMixin, ModelView):
 
     list_columns = ['code_type', 'bapco_code', 'oldcode_p', 'created_by', 'created','cdrlitem', 'documentclass', 'status']
     edit_columns = ['oldcode', 'cdrlitem', 'documentclass', 'notes']
-    
+    search_columns = ['unit', 'materialclass', 'doctype', 'partner', 'cdrlitem', 'documentclass','code', 'oldcode', 'created_by', 'created_on']
     label_columns = {
         'id': 'ID',
         'created': 'Created On',
@@ -1139,6 +1139,8 @@ class DocumentView(CompactCRUDMixin, ModelView):
     #show_columns = ['id', 'code_type', 'bapco_code', 'oldcode', 'created_by', 'created', 'status']
     list_columns = ['code_type', 'bapco_code', 'oldcode_p','notes', 'created', 'status']
     edit_columns = ['oldcode', 'notes']
+    
+    search_columns = ['unit', 'materialclass', 'doctype', 'partner', 'cdrlitem', 'documentclass','code', 'oldcode', 'created_by', 'created_on']
 
     #search_columns = DocRequestsView.search_columns
 
@@ -1254,7 +1256,7 @@ class SuperListRequest(ModelView):
     #base_filters = [['created_by', FilterEqualFunction, get_user]]
     base_permissions = ['can_list', 'can_show','can_delete'] 
 
-    
+
 
     list_title = 'Supervisor - All Requests'
     add_title = 'Add new Request'
