@@ -22,7 +22,9 @@ from flask_babel import gettext
 from flask_appbuilder import BaseView, expose, has_access
 
 from wtforms.validators import DataRequired, InputRequired
-from .helpers import adddoc3, bapco, tocsv, toxlsx, codes_to_xlsx, update_from_xlsx, setting_update, old_codes_update, old_codes, gen_excel_byreq
+from .helpers import (adddoc3, bapco, tocsv, toxlsx, codes_to_xlsx, 
+                      update_from_xlsx, setting_update, old_codes_update,
+                      old_codes, gen_excel_byreq, mailsupport)
 import csv
 from app import app
 from flask_appbuilder.actions import action
@@ -1176,7 +1178,31 @@ class DocumentView(CompactCRUDMixin, ModelView):
         #redirect(self.get_redirect())
         self.update_redirect()
         return send_file('static/csv/' + filename, as_attachment=True)
-
+    
+    
+    @action("support", "Support", "", "fa-table")
+    def support(self, items):
+        print('Support from DocumentView')
+        if isinstance(items, list):
+            codes_list = []
+            for item in items:
+                print('item', item.code)
+                codes_list.append([item.code, item.oldcode, str(item.notes)])
+            filename = codes_to_xlsx(codes_list)
+            
+            self.update_redirect()
+            
+        else:
+            filename = codes_to_xlsx(items.code)
+        
+        mailsupport(codes_list, filename)
+        
+        #print(codes_list)
+        #redirect(self.get_redirect())
+        self.update_redirect()
+        #return send_file('static/csv/' + filename, as_attachment=True)
+        flash('Help Desk: We have your support request.', category='info') 
+        return redirect(self.get_redirect())
 class UserDocumentView(MasterDetailView):
     datamodel = SQLAInterface(User)
     related_views = [DocumentView]

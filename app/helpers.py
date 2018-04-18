@@ -9,6 +9,7 @@ import csv, xlsxwriter
 from werkzeug.utils import secure_filename
 import uuid
 import openpyxl, os
+from app import app
 
 
 
@@ -678,6 +679,7 @@ def gen_excel_byreq(req_item):
     
 #xls = open('bapco_codes.xlsx','rb')
 def old_codes(self, file):
+
     book = openpyxl.load_workbook(file)
     sheet = book.active
     session = db.session
@@ -828,4 +830,36 @@ def old_codes(self, file):
     for i in not_found_list:
         print(i[0],i[1], i[2])
     '''
-    return not_found_list, found_list, result_file 
+    return not_found_list, found_list, result_file
+
+#
+# Mail Support
+#
+
+
+app.config['MAIL_SERVER']='mail.quasarpm.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USERNAME'] = 'info@quasarpm.com'
+app.config['MAIL_PASSWORD'] = '300777Info'
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
+#app.config['MAIL_ASCII_ATTACHMENTS']= True
+
+from flask_mail import Mail, Message
+
+mail = Mail(app)
+user = get_user()
+def mailsupport(codes, filename):
+    msg = Message('Ask Bapco | DCC Support', sender = 'info@quasarpm.com', recipients = ['danilo.pacifico@gmail.com'])
+    list_codes = []
+    for row in codes:
+        list_codes.append(' | '.join(row))  
+    body = '<br>'.join(list_codes)  
+    msg.body = body + "\n"
+    msg.html = "<b>Ask Bapco | Support Request</b>\
+    <p>" + body + "\
+    <p>We have received your request and will contact you via email or by telephone shortly. If you require immediate assistance, please call our office. </p>\
+    <p>If you do not receive an email response from us in your inbox within a day or so, please check your spam/junk email folder.</p>"
+    mail.send(msg)
+
+    return "Sent"
