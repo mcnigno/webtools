@@ -240,8 +240,8 @@ class SuperDocumentView(CompactCRUDMixin, ModelView):
     show_title = 'Show Code'
     show_exclude_columns = 'docrequests'
 
-    list_columns = ['id', 'code_type', 'bapco_code', 'oldcode_p', 'created_by', 'created', 'status']
-    edit_columns = ['oldcode', 'notes']
+    list_columns = ['code_type', 'bapco_code', 'oldcode_p', 'created_by', 'created','cdrlitem', 'documentclass', 'status']
+    edit_columns = ['oldcode', 'cdrlitem', 'documentclass', 'notes']
     
     label_columns = {
         'id': 'ID',
@@ -253,6 +253,8 @@ class SuperDocumentView(CompactCRUDMixin, ModelView):
         'oldcode_p': 'Contractor Code',
         'code': 'Bapco Code',
         'code_type': 'Type',
+        'cdrlitem': 'CDRL',
+        'documentclass': 'Doc Class'
     }
     '''
     @action("muldelete", "Delete", "Delete all Really?", "fa-rocket")
