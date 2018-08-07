@@ -848,7 +848,7 @@ app.config['MAIL_USE_SSL'] = True
 from flask_mail import Mail, Message
 
 mail = Mail(app)
-user = get_user()
+#user = get_user()
 def mailsupport(codes, filename):
     msg = Message('Ask Bapco | DCC Support', sender = 'info@quasarpm.com', recipients = ['danilo.pacifico@gmail.com'])
     list_codes = []
