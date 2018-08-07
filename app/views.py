@@ -443,7 +443,7 @@ class AskBapcoView(MultipleView):
 
 class UnitView(CompactCRUDMixin, ModelView):
     datamodel = SQLAInterface(Unit)
-    list_columns = ['unit', 'name', 'unit_type', 'description']
+    list_columns = ['unit', 'name', 'unit_type', 'start', 'stop']
 
     add_columns = ['unit', 'name', 'unit_type', 'start', 'stop']
     edit_columns = ['unit', 'name', 'unit_type', 'start', 'stop']
