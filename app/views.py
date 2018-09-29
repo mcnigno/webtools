@@ -53,7 +53,7 @@ class CsvView(BaseView):
     def send_csv(reqid):
         print('SEND CSV')
         return send_file(filename) 
-
+       
 '''
 def choice_unit(self,item):
     print('CHOICE UNIT')
@@ -65,7 +65,7 @@ def choice_unit(self,item):
     print('lunghezza di result unit:')
     return self, item
 '''
-
+  
 def matrixenc(self, item):
 
     print('matix ENC')

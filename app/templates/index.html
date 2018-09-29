@@ -2,6 +2,46 @@
 {% block content %}
 <script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js" integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl" crossorigin="anonymous"></script>
 
+<table class="table table-sm table-over">
+  <strong><i class="fas fa-braille element title"></i>Settings</strong>
+  <thead>
+    <tr>
+      <th scope="col-md-1 col-sm-1"></th>
+      <th scope="col-md-1 col-sm-1"></th>
+      <th scope="col-md-8 col-sm-8"></th>
+      <th scope="col-md-2 col-sm-2"></th>
+    </tr>
+  </thead>
+  <tbody style="text-align: left">
+    <tr>
+      <th scope="row">1</th>
+      <td><i class="fas fa-handshake element"></i>Partner</td>
+      <td>Partner</td>
+      <td class="total">{{partner}}</td>
+    </tr>
+    <tr>
+      <th scope="row">4</th>
+      <td><i class="fas fa-th-large element"></i>Plant Unit</td>
+      <td>Plant unit</td>
+      <td class="total">{{unit}}</td>
+    </tr>
+    <tr>
+      <th scope="row">2</th>
+      <td><i class="fas fa-puzzle-piece element"></i>Material Class</td>
+      <td>Material Class</td>
+      <td class="total">{{material}}</td>
+    </tr>
+    <tr>
+      <th scope="row">3</th>
+      <td><i class="fas fa-copy element"></i>Document Type</td>
+      <td>Document Type</td>
+      <td class="total">{{doctype}}</td>
+    </tr>
+    
+  </tbody>
+</table>
+
+
 <div class="jumbotron row">
     
   

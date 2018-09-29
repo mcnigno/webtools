@@ -52,7 +52,30 @@ body {
 
 
 table {
-    font-size: 14px;
+    font-size: 12px;
+}
+svg:not(:root).svg-inline--fa.element {
+    overflow: visible;
+    margin: 0px 7px;
+    color: #04a1dd;
+}
+svg:not(:root).svg-inline--fa.element.title {
+    overflow: visible;
+    margin: 0px 7px;
+    color:blueviolet;
+}
+
+td.total {
+    
+    color: #04a1dd;
+    border-radius: 0%;
+    border: 2px 0 0 0 #04a1dd;
+    text-align: center;
+}
+.table td.fit, 
+.table th.fit {
+    white-space: nowrap;
+    width: 1%;
 }
 
 
