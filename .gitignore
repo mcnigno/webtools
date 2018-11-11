@@ -110,5 +110,5 @@ app.db
 
 #csv folder
 
-app/static/csv/
+#app/static/csv/
 *.xlsx
