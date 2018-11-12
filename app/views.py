@@ -24,7 +24,7 @@ from flask_appbuilder import BaseView, expose, has_access
 from wtforms.validators import DataRequired, InputRequired
 from .helpers import (adddoc3, bapco, tocsv, toxlsx, codes_to_xlsx, 
                       update_from_xlsx, setting_update, old_codes_update,
-                      old_codes, gen_excel_byreq, mailsupport)
+                      old_codes, gen_excel_byreq, mailsupport, code_type)
 import csv
 from app import app
 from flask_appbuilder.actions import action
@@ -181,6 +181,7 @@ def get_pending():
                                     
 
 class PendingView(ModelView):
+    page_size = 25
     datamodel = SQLAInterface(Document)
     list_title = 'Pending Codes'
     
@@ -193,7 +194,7 @@ class PendingView(ModelView):
     edit_title = 'Edit Code'
     show_title = 'Show Code'
     
-    list_columns = ['code_type', 'bapco_code', 'oldcode_p', 'notes', 'created', 'status']
+    list_columns = ['code_type', 'bapco_code', 'oldcode_p', 'created']
     edit_columns = ['oldcode', 'notes']
     
     label_columns = {
@@ -205,7 +206,7 @@ class PendingView(ModelView):
         'oldcode': 'Contractor Code',
         'oldcode_p': 'Contractor Code',
         'code': 'Bapco Code',
-        'code_type': 'Type',
+        'code_type': 'Info',
     }
     
     @action("export", "Export","", "fa-table")
@@ -232,7 +233,7 @@ class PendingView(ModelView):
 
 class SuperDocumentView(CompactCRUDMixin, ModelView):
     datamodel = SQLAInterface(Document)
-    list_title = 'Supervisor | Bapco Codes'
+    list_title = 'Supervisor | All Bapco Codes'
     #list_widget = MyListWidget
     
     base_order = ('id', 'desc')
@@ -243,7 +244,8 @@ class SuperDocumentView(CompactCRUDMixin, ModelView):
     show_title = 'Show Code'
     show_exclude_columns = 'docrequests'
 
-    list_columns = ['code_type', 'bapco_code', 'oldcode_p', 'created_by', 'created','cdrlitem', 'documentclass', 'status']
+    #list_columns = ['code_type', 'bapco_code', 'oldcode_p', 'created_by', 'created','cdrlitem', 'documentclass']
+    list_columns = ['code_type', 'bapco_code', 'oldcode_p', 'created']
     edit_columns = ['oldcode', 'cdrlitem', 'documentclass', 'notes']
     search_columns = ['unit', 'materialclass', 'doctype', 'partner', 'cdrlitem', 'documentclass','code', 'oldcode', 'created_by', 'created_on']
     label_columns = {
@@ -638,8 +640,8 @@ class DocRequestsView(ModelView):
     edit_columns = ['unit', 'materialclass', 'doctype', 'cdrlitem',
                     'documentclass', 'partner']
     
-    search_columns = ['unit', 'materialclass', 'doctype', 'cdrlitem',
-                      'documentclass', 'partner', 'quantity', 'created_on']
+    #search_columns = ['request_type', 'unit', 'materialclass', 'doctype', 'cdrlitem',
+                      #'documentclass', 'partner', 'quantity', 'created_on']
     search_columns = UnitView.search_columns
     
     add_exclude_columns = ['id', 'matrix']
@@ -1127,6 +1129,7 @@ def page_not_found(e):
                            appbuilder=appbuilder), 404
 
 class DocumentView(CompactCRUDMixin, ModelView):
+    page_size = 25
     datamodel = SQLAInterface(Document)
     list_title = 'Bapco Codes'
     related_views = [CommentsView]
@@ -1141,7 +1144,7 @@ class DocumentView(CompactCRUDMixin, ModelView):
 
     
     #show_columns = ['id', 'code_type', 'bapco_code', 'oldcode', 'created_by', 'created', 'status']
-    list_columns = ['code_type', 'bapco_code', 'oldcode_p','notes', 'created', 'status']
+    list_columns = ['code_type', 'bapco_code', 'oldcode_p', 'created']
     edit_columns = ['oldcode', 'notes']
     
     search_columns = ['unit', 'materialclass', 'doctype', 'partner', 'cdrlitem', 'documentclass','code', 'oldcode', 'created_by', 'created_on']
@@ -1205,6 +1208,9 @@ class DocumentView(CompactCRUDMixin, ModelView):
         #return send_file('static/csv/' + filename, as_attachment=True)
         flash('Help Desk: We have your support request.', category='info') 
         return redirect(self.get_redirect())
+
+
+
 class UserDocumentView(MasterDetailView):
     datamodel = SQLAInterface(User)
     related_views = [DocumentView]
@@ -1245,7 +1251,7 @@ class ListRequest(ModelView):
 
     }
     
-    list_columns = ['req_type', 'req_description', 'created', 'csv']
+    list_columns = ['req_type','request_type', 'req_description', 'created', 'csv']
     edit_columns = ['unit', 'materialclass', 'doctype', 'partner']
 
 
@@ -1277,6 +1283,330 @@ class ListRequest(ModelView):
                                     'partner'], 'expanded':True}
                         ),
                      ]
+
+
+class EngDocumentView(CompactCRUDMixin, ModelView):
+    page_size = 25
+    datamodel = SQLAInterface(Document)
+    list_title = 'Engineering Codes List'
+    related_views = [CommentsView]
+    
+    
+    base_order = ('id', 'desc')
+    base_filters = [['created_by', FilterEqualFunction, get_user],['docrequests.request_type', FilterStartsWith, 'eng']]
+    base_permissions = ['can_list', 'can_show', 'can_edit'] 
+    #search_form_query_rel_fields = {'docrequests':[['request_type',FilterStartsWith,'eng']]}
+    edit_title = 'Edit Code'
+    show_title = 'Show Code'
+
+    
+    #show_columns = ['id', 'code_type', 'bapco_code', 'oldcode', 'created_by', 'created', 'status']
+    list_columns = ['code_type', 'bapco_code', 'oldcode_p','created']
+    edit_columns = ['oldcode', 'notes']
+    
+    search_columns = ['code', 'oldcode', 'created_by', 'created_on']
+    #search_columns = ['Docrequests.request_type','unit', 'materialclass']
+    #search_columns = ListRequest.search_columns
+
+    label_columns = {
+        'id': 'ID',
+        'created': 'Created On',
+        'modified': 'Modified On',
+        'changed_by': 'Modified By',
+        'status': 'Status',
+        'oldcode': 'Contractor Code',
+        'oldcode_p': 'Contractor Code',
+        'code': 'Bapco Code',
+        'code_type': 'Info',
+        
+    }
+   
+    @action("export", "Export", "", "fa-table")
+    def export(self, items):
+        print('Export from DocumentView')
+        if isinstance(items, list):
+            codes_list = []
+            for item in items:
+                print('item', item.code)
+                codes_list.append([item.code, item.oldcode])
+            filename = codes_to_xlsx(codes_list)
+            
+            self.update_redirect()
+            
+        else:
+            filename = codes_to_xlsx(items.code)
+        
+        #print(codes_list)
+        #redirect(self.get_redirect())
+        self.update_redirect()
+        return send_file('static/csv/' + filename, as_attachment=True)
+    
+    
+    @action("support", "Support", "", "fa-table")
+    def support(self, items):
+        print('Support from DocumentView')
+        if isinstance(items, list):
+            codes_list = []
+            for item in items:
+                print('item', item.code)
+                codes_list.append([item.code, item.oldcode, str(item.notes)])
+            filename = codes_to_xlsx(codes_list)
+            
+            self.update_redirect()
+            
+        else:
+            filename = codes_to_xlsx(items.code)
+        
+        mailsupport(codes_list, filename)
+        
+        #print(codes_list)
+        #redirect(self.get_redirect())
+        self.update_redirect()
+        #return send_file('static/csv/' + filename, as_attachment=True)
+        flash('Help Desk: We have your support request.', category='info') 
+        return redirect(self.get_redirect())
+
+
+class SuperEngDocumentView(CompactCRUDMixin, ModelView):
+    page_size = 25
+    datamodel = SQLAInterface(Document)
+    list_title = 'Engineering Codes List'
+    related_views = [CommentsView]
+    
+    
+    base_order = ('id', 'desc')
+    base_filters = [['docrequests.request_type', FilterStartsWith, 'eng']]
+    base_permissions = ['can_list', 'can_show', 'can_edit'] 
+    #search_form_query_rel_fields = {'docrequests':[['request_type',FilterStartsWith,'eng']]}
+    edit_title = 'Edit Code'
+    show_title = 'Show Code'
+
+    
+    #show_columns = ['id', 'code_type', 'bapco_code', 'oldcode', 'created_by', 'created', 'status']
+    list_columns = ['code_type', 'bapco_code', 'oldcode_p','created']
+    edit_columns = ['oldcode', 'notes']
+    
+    search_columns = ['code', 'oldcode', 'created_by', 'created_on']
+    #search_columns = ['Docrequests.request_type','unit', 'materialclass']
+    #search_columns = ListRequest.search_columns
+
+    label_columns = {
+        'id': 'ID',
+        'created': 'Created On',
+        'modified': 'Modified On',
+        'changed_by': 'Modified By',
+        'status': 'Status',
+        'oldcode': 'Contractor Code',
+        'oldcode_p': 'Contractor Code',
+        'code': 'Bapco Code',
+        'code_type': 'Info',
+        
+    }
+   
+    @action("export", "Export", "", "fa-table")
+    def export(self, items):
+        print('Export from DocumentView')
+        if isinstance(items, list):
+            codes_list = []
+            for item in items:
+                print('item', item.code)
+                codes_list.append([item.code, item.oldcode])
+            filename = codes_to_xlsx(codes_list)
+            
+            self.update_redirect()
+            
+        else:
+            filename = codes_to_xlsx(items.code)
+        
+        #print(codes_list)
+        #redirect(self.get_redirect())
+        self.update_redirect()
+        return send_file('static/csv/' + filename, as_attachment=True)
+    
+    
+    @action("support", "Support", "", "fa-table")
+    def support(self, items):
+        print('Support from DocumentView')
+        if isinstance(items, list):
+            codes_list = []
+            for item in items:
+                print('item', item.code)
+                codes_list.append([item.code, item.oldcode, str(item.notes)])
+            filename = codes_to_xlsx(codes_list)
+            
+            self.update_redirect()
+            
+        else:
+            filename = codes_to_xlsx(items.code)
+        
+        mailsupport(codes_list, filename)
+        
+        #print(codes_list)
+        #redirect(self.get_redirect())
+        self.update_redirect()
+        #return send_file('static/csv/' + filename, as_attachment=True)
+        flash('Help Desk: We have your support request.', category='info') 
+        return redirect(self.get_redirect())
+
+class VendorDocumentView(CompactCRUDMixin, ModelView):
+    datamodel = SQLAInterface(Document)
+    list_title = 'Vendor Codes List'
+    related_views = [CommentsView]
+    
+    
+    base_order = ('id', 'desc')
+    base_filters = [['created_by', FilterEqualFunction, get_user],['docrequests.request_type', FilterStartsWith, 'ven']]
+    base_permissions = ['can_list', 'can_show', 'can_edit'] 
+    #search_form_query_rel_fields = {'docrequests':[['request_type',FilterStartsWith,'eng']]}
+    edit_title = 'Edit Code'
+    show_title = 'Show Code'
+
+    
+    #show_columns = ['id', 'code_type', 'bapco_code', 'oldcode', 'created_by', 'created', 'status']
+    list_columns = ['code_type', 'bapco_code', 'oldcode_p', 'created']
+    edit_columns = ['oldcode', 'notes']
+    
+    search_columns = ['code', 'oldcode', 'created_by', 'created_on','vendor','mr']
+    #search_columns = ['Docrequests.request_type','unit', 'materialclass']
+    #search_columns = ListRequest.search_columns
+
+    label_columns = {
+        'id': 'ID',
+        'created': 'Created On',
+        'modified': 'Modified On',
+        'changed_by': 'Modified By',
+        'status': 'Status',
+        'oldcode': 'Contractor Code',
+        'oldcode_p': 'Contractor Code',
+        'code': 'Bapco Code',
+        'code_type': 'Info',
+        
+    }
+   
+    @action("export", "Export", "", "fa-table")
+    def export(self, items):
+        print('Export from DocumentView')
+        if isinstance(items, list):
+            codes_list = []
+            for item in items:
+                print('item', item.code)
+                codes_list.append([item.code, item.oldcode])
+            filename = codes_to_xlsx(codes_list)
+            
+            self.update_redirect()
+            
+        else:
+            filename = codes_to_xlsx(items.code)
+        
+        #print(codes_list)
+        #redirect(self.get_redirect())
+        self.update_redirect()
+        return send_file('static/csv/' + filename, as_attachment=True)
+    
+    
+    @action("support", "Support", "", "fa-table")
+    def support(self, items):
+        print('Support from DocumentView')
+        if isinstance(items, list):
+            codes_list = []
+            for item in items:
+                print('item', item.code)
+                codes_list.append([item.code, item.oldcode, str(item.notes)])
+            filename = codes_to_xlsx(codes_list)
+            
+            self.update_redirect()
+            
+        else:
+            filename = codes_to_xlsx(items.code)
+        
+        mailsupport(codes_list, filename)
+        
+        #print(codes_list)
+        #redirect(self.get_redirect())
+        self.update_redirect()
+        #return send_file('static/csv/' + filename, as_attachment=True)
+        flash('Help Desk: We have your support request.', category='info') 
+        return redirect(self.get_redirect())
+
+class SuperVendorDocumentView(CompactCRUDMixin, ModelView):
+    datamodel = SQLAInterface(Document)
+    list_title = 'Vendor Codes List'
+    related_views = [CommentsView]
+    
+    
+    base_order = ('id', 'desc')
+    base_filters = [['docrequests.request_type', FilterStartsWith, 'ven']]
+    base_permissions = ['can_list', 'can_show', 'can_edit'] 
+    #search_form_query_rel_fields = {'docrequests':[['request_type',FilterStartsWith,'eng']]}
+    edit_title = 'Edit Code'
+    show_title = 'Show Code'
+
+    
+    #show_columns = ['id', 'code_type', 'bapco_code', 'oldcode', 'created_by', 'created', 'status']
+    list_columns = ['code_type', 'bapco_code', 'oldcode_p', 'created']
+    edit_columns = ['oldcode', 'notes']
+    
+    search_columns = ['code', 'oldcode', 'created_by', 'created_on','vendor','mr']
+    #search_columns = ['Docrequests.request_type','unit', 'materialclass']
+    #search_columns = ListRequest.search_columns
+
+    label_columns = {
+        'id': 'ID',
+        'created': 'Created On',
+        'modified': 'Modified On',
+        'changed_by': 'Modified By',
+        'status': 'Status',
+        'oldcode': 'Contractor Code',
+        'oldcode_p': 'Contractor Code',
+        'code': 'Bapco Code',
+        'code_type': 'Info',
+        
+    }
+   
+    @action("export", "Export", "", "fa-table")
+    def export(self, items):
+        print('Export from DocumentView')
+        if isinstance(items, list):
+            codes_list = []
+            for item in items:
+                print('item', item.code)
+                codes_list.append([item.code, item.oldcode])
+            filename = codes_to_xlsx(codes_list)
+            
+            self.update_redirect()
+            
+        else:
+            filename = codes_to_xlsx(items.code)
+        
+        #print(codes_list)
+        #redirect(self.get_redirect())
+        self.update_redirect()
+        return send_file('static/csv/' + filename, as_attachment=True)
+    
+    
+    @action("support", "Support", "", "fa-table")
+    def support(self, items):
+        print('Support from DocumentView')
+        if isinstance(items, list):
+            codes_list = []
+            for item in items:
+                print('item', item.code)
+                codes_list.append([item.code, item.oldcode, str(item.notes)])
+            filename = codes_to_xlsx(codes_list)
+            
+            self.update_redirect()
+            
+        else:
+            filename = codes_to_xlsx(items.code)
+        
+        mailsupport(codes_list, filename)
+        
+        #print(codes_list)
+        #redirect(self.get_redirect())
+        self.update_redirect()
+        #return send_file('static/csv/' + filename, as_attachment=True)
+        flash('Help Desk: We have your support request.', category='info') 
+        return redirect(self.get_redirect())
 
 class SuperListRequest(ModelView):
     datamodel = SQLAInterface(DocRequests)
@@ -1391,15 +1721,26 @@ appbuilder.add_separator(category='Requests')
 appbuilder.add_view(ListRequest, "All Requests",
                     icon="fa-codepen", category="Requests")
 
+
 appbuilder.add_view(DocumentView, "All Your Codes",
                     icon="fa-list", category="Your Codes")
 
+
+appbuilder.add_separator(category="Your Codes")
+appbuilder.add_view(EngDocumentView, "Engineering Codes",
+                    icon="fas fa-copy element", category="Your Codes")
+
+appbuilder.add_view(VendorDocumentView, "Vendor Codes",
+                    icon="fas fa-copy element", category="Your Codes")
+
+
+appbuilder.add_separator(category="Your Codes")
 appbuilder.add_view(PendingView, "Only Pending Codes",
                     icon="fa-folder-open", category="Your Codes",
                     category_icon='fa-bold')
 
-appbuilder.add_separator(category="Your Codes")
 
+appbuilder.add_separator(category="Your Codes")
 appbuilder.add_view(Uploadcodes, "Update Codes (Excel)",
                     icon="fa-paper-plane", category="Your Codes",
                     category_icon='fa-bold')
@@ -1446,13 +1787,23 @@ appbuilder.add_view(MatrixView, "Matrix View",
 #       
 
 appbuilder.add_view(SuperListRequest, "All Requests",
-                    icon="fa-folder-open-o", category="Supervisor",
+                    icon="fas fa-list", category="Supervisor",
                     category_icon='fa-envelope')
 
 appbuilder.add_view(SuperDocumentView, "All Codes",
-                    icon="fa-folder-open-o", category="Supervisor",
+                    icon="fa-list", category="Supervisor",
                     category_icon='fa-envelope')
 
+appbuilder.add_view(SuperEngDocumentView, "All Engineering Codes",
+                    icon="fas fa-copy element", category="Supervisor",
+                    category_icon='fa-envelope')
+
+appbuilder.add_view(SuperVendorDocumentView, "All Vendor Codes",
+                    icon="fas fa-copy element", category="Supervisor",
+                    category_icon='fa-envelope')
+
+
+'''
 appbuilder.add_view(UserDocumentView, "Codes Generated by User",
                     icon="fa-folder-open-o", category="Supervisor")
 
@@ -1466,3 +1817,4 @@ appbuilder.add_view(RequestChartView, "Naming Requests Chart",
 appbuilder.add_view(TimelineChart, "Timeline Request Chart",
                     icon="fa-folder-open-o", category="Supervisor",
                     category_icon='fa-envelope')
+'''

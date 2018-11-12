@@ -12,7 +12,9 @@ import openpyxl, os
 from app import app
 
 
-
+def code_type(item):
+    request = item.docrequests
+    return request.request_type
 
 
 def adddoc3(self, item):

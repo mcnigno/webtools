@@ -51,13 +51,11 @@ body {
 }
 
 
-table {
-    font-size: 16px;
-}
+
 svg:not(:root).svg-inline--fa.element {
     overflow: visible;
     margin: 0px 7px;
-    color: #04a1dd;
+    color: #fff;
 }
 svg:not(:root).svg-inline--fa.element.title {
     overflow: visible;
@@ -90,7 +88,7 @@ td.total {
 }
 .panel-primary {
     border-color: #ebebeb;
-    background-color: #efefef;
+    background-color: #ffffff;
 }
 h3, .h3 {
     text-align: center;
@@ -99,11 +97,13 @@ h3, .h3 {
 
 #eng_ico {
     color: #9fa411;
-    margin: 5px;
+    margin-right: 5px;
+    margin-left: 5px;
 }
 #ven_ico {
     color: #6c9196;
-    margin: 5px;
+    margin-right: 5px;
+    margin-left: 5px;
 }
 #\32 > div{
     background-color: #ebebeb;
@@ -129,4 +129,47 @@ h3, .h3 {
     background-color: #f2f2f2;
     margin: auto;
     max-width: 70%;
+}
+#pending{
+    color: #e99002;
+    margin-right: 5px;
+    margin-left: 5px;
+}
+#reserved{
+    color: #04a1dd;
+    margin-right: 5px;
+    margin-left: 5px;
+}
+#destroyed{
+    color: red;
+    margin-right: 5px;
+    margin-left: 5px;
+}
+body > div.container > div > div > div:nth-child(3) > div.table-responsive > table > tbody > tr > td{
+    padding: 3px;
+    vertical-align: bottom;
+    max-width: 38px;
+    -webkit-transition: all .2s ease-in-out;
+    transition: all .2s ease-in-out;
+}
+body > div.container > div > div > div:nth-child(3) > div.table-responsive > table > tbody > tr > td:hover {
+    padding: 3px;
+    vertical-align: bottom;
+    max-width: 38px;
+    -webkit-transform: scale(1.4);
+    transform: scale(1.4);
+    background-color: transparent;
+    font-size: 18px;
+    text-align: center;
+ 
+}
+#s_label {
+    font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+    text-transform: uppercase;
+    margin-left: 10px;
+    font-size: 10px;
+    color: #2c2c2c
+}
+#legend{
+    text-align: right;
 }

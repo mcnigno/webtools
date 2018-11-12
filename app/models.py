@@ -261,7 +261,7 @@ class Document(AuditMixin, Model):
     matrix_id = Column(Integer, ForeignKey('matrix.id'))
     matrix = relationship('Matrix')
 
-
+                                      
 
     def __repr__(self):
         return self.code
@@ -273,14 +273,14 @@ class Document(AuditMixin, Model):
 
     def status(self):
         if self.oldcode == 'empty':
-            return Markup('<img border="0" src="/static/img/pending.png" alt="W3Schools" width="16" height="16">'+' Pending')
+            return Markup('<i id="pending" class="fas fa-lock-open"></i>')
         elif self.oldcode == 'void':
-            return Markup('<img border="0" src="/static/img/destroyed.png" alt="W3Schools" width="16" height="16">'+' Destroyed')
+            return Markup('<i id="destroyed" class="fas fa-backspace"></i>')            
         else:
-            return Markup('<img border="0" src="/static/img/reserved.png" alt="W3Schools" width="16" height="16">'+' Reserved')
+            return Markup('<i id="reserved" class="fas fa-lock"></i>')
 
     def code_type(self):
-        return self.docrequests.req_type()
+        return self.docrequests.req_type() + self.status()
 
     def created(self):
         date = self.created_on

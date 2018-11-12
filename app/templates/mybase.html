@@ -16,3 +16,39 @@
 
     {% endblock %}
 
+{% block body %}
+{{ super() }}
+{% endblock %}
+
+{% block navbar %}
+{{ super() }}
+{% endblock %}
+     
+{% block messages %}
+     {{ super() }}
+     <div id="legend">
+        <p>
+            <!--
+            <a href="/docrequestsview/list/"><i id="eng_ico" class="fas fa-copy element"></i>&nbsp ENGINEERING</a>
+            <a href="/vendorrequestsview/list/"><i id="ven_ico" class="fas fa-copy element"></i>&nbsp VENDOR&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp</a>
+            -->
+            <i id="pending" class="fas fa-lock-open"><span id="s_label">Pending</span></i>
+            <i id="reserved" class="fas fa-lock"><span id="s_label">Reserved</span></i>
+            <i id="destroyed" class="fas fa-backspace"><span id="s_label">Destroyed</span></i>
+        </p>
+    </div>
+{% endblock %}
+
+    
+    
+    {% block content %}
+    
+
+    <div>
+        <h3>content here</h3>
+    </div>
+    
+      {% endblock %}
+    
+   
+
