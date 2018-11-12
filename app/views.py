@@ -1449,6 +1449,7 @@ class SuperEngDocumentView(CompactCRUDMixin, ModelView):
         return redirect(self.get_redirect())
 
 class VendorDocumentView(CompactCRUDMixin, ModelView):
+    page_size = 25
     datamodel = SQLAInterface(Document)
     list_title = 'Vendor Codes List'
     related_views = [CommentsView]
@@ -1529,6 +1530,7 @@ class VendorDocumentView(CompactCRUDMixin, ModelView):
         return redirect(self.get_redirect())
 
 class SuperVendorDocumentView(CompactCRUDMixin, ModelView):
+    page_size = 25
     datamodel = SQLAInterface(Document)
     list_title = 'Vendor Codes List'
     related_views = [CommentsView]
