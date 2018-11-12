@@ -178,7 +178,7 @@ def adddoc2(self, item):
 def get_pending():
     return 'reserved'
 '''
-        
+                                    
 
 class PendingView(ModelView):
     datamodel = SQLAInterface(Document)
@@ -228,6 +228,7 @@ class PendingView(ModelView):
         redirect(self.get_redirect())
         #self.update_redirect()
         return send_file('static/csv/' + filename, as_attachment=True)
+
 
 class SuperDocumentView(CompactCRUDMixin, ModelView):
     datamodel = SQLAInterface(Document)
@@ -316,6 +317,7 @@ class SuperDocumentView(CompactCRUDMixin, ModelView):
         #redirect(self.get_redirect())
         self.update_redirect()
         return send_file('static/csv/' + filename, as_attachment=True)
+
 
 # Engineering Form Request
 

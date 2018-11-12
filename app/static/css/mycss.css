@@ -52,7 +52,7 @@ body {
 
 
 table {
-    font-size: 12px;
+    font-size: 16px;
 }
 svg:not(:root).svg-inline--fa.element {
     overflow: visible;
@@ -78,19 +78,55 @@ td.total {
     width: 1%;
 }
 
-.panel-primary>.panel-heading {
+.add_eng>.panel-primary>.panel-heading {
     color: #ffffff;
-    background-color: #db392d;
-    border-color: #c03a30;
+    background-color: #9ba05c;
+    border-color: #9ba05c;
 }
 .add_eng {
-    background-color: #e3574c
+    background-color: #f2f2f2;
+    margin: auto;
+    max-width: 70%;
 }
 .panel-primary {
-    border-color: #c03a30;
+    border-color: #ebebeb;
+    background-color: #efefef;
 }
 h3, .h3 {
     text-align: center;
     font-size: 26px;
 }
 
+#eng_ico {
+    color: #9fa411;
+    margin: 5px;
+}
+#ven_ico {
+    color: #6c9196;
+    margin: 5px;
+}
+#\32 > div{
+    background-color: #ebebeb;
+}
+#quantity{
+    max-width: 80px;
+}
+#model_form > div.well.well-sm{
+    margin: auto;
+    max-width: 45%;
+}
+#model_form > div.well.well-sm > button{
+    width: 50%;
+    float: right;
+}
+
+.add_vendor>.panel-primary>.panel-heading {
+    color: #ffffff;
+    background-color: #6c9196;
+    border-color: #6c9196;
+}
+.add_vendor {
+    background-color: #f2f2f2;
+    margin: auto;
+    max-width: 70%;
+}

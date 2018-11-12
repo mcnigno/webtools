@@ -181,10 +181,10 @@ class DocRequests(AuditMixin, Model):
     def req_type(self):
 
         if self.request_type == 'vendor':  
-            return Markup('<img border="0" src="/static/img/vendor.png" alt="W3Schools" width="24" height="24"> ') 
+            return Markup('<i id="ven_ico" class="fas fa-copy element"></i>') 
             
         elif self.request_type == 'engineering':
-            return Markup('<img border="0" src="/static/img/engineering.png" alt="W3Schools" width="24" height="24"> ')
+            return Markup('<i id="eng_ico" class="fas fa-copy element"></i>')
     
         else:
             return '#ND'    
