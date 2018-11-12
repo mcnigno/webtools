@@ -49,7 +49,7 @@ def get_user():
 class CsvView(BaseView):
     
     @has_access
-    @expose('/getcsv/<string:reqid>')
+    @expose('/getcsv/<string:reqid>') 
     def send_csv(reqid):
         print('SEND CSV')
         return send_file(filename) 
