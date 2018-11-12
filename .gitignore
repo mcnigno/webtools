@@ -112,3 +112,4 @@ app.db
 
 #app/static/csv/
 *.xlsx
+.vscode/
