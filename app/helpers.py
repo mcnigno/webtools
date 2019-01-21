@@ -221,7 +221,7 @@ def bapco(self, item):
             
     else:
         # Create a New Matrix for common units
-        if result.unit_type == 'common':
+        if result.unit_type == 'common' or str(item.partner) == 'Subcontractors':
 
             print('item partner to find: ', item.partner)
             
