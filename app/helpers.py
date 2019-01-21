@@ -153,8 +153,8 @@ def bapco(self, item):
     result = db.session.query(Unit).filter(Unit.unit == str(item.unit)).first()
     
 
-    if str(result.unit_type) == 'common':
-        print('Match unit type common Found')
+    if str(result.unit_type) == 'common' or item.partner == 'Subcontracting':
+        print('Match unit type common or subcontracting Found')
 
         # Add the partner id to the matrix
         item_matrix = str.join('-', (str(item.unit),
