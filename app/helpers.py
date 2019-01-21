@@ -152,7 +152,7 @@ def bapco(self, item):
     # Set item_matrix based on unit type
     result = db.session.query(Unit).filter(Unit.unit == str(item.unit)).first()
     
-
+    print('UNIT TYPE:', result.unit_type, 'PARTNER:', item.partner)
     if str(result.unit_type) == 'common' or item.partner == 'Subcontractors':
         print('Match unit type common or subcontracting Found')
 
