@@ -237,7 +237,7 @@ class SuperDocumentView(CompactCRUDMixin, ModelView):
     #list_widget = MyListWidget
     
     base_order = ('id', 'desc')
-    #base_filters = [['created_by', FilterEqualFunction, get_user]]
+    base_filters = [['docrequests.request_type', FilterEqual, "Engineering"]]
     base_permissions = ['can_list', 'can_show', 'can_edit', 'can_delete'] 
 
     edit_title = 'Edit Code'
@@ -1136,7 +1136,7 @@ class DocumentView(CompactCRUDMixin, ModelView):
     
     
     base_order = ('id', 'desc')
-    base_filters = [['created_by', FilterEqualFunction, get_user]]
+    base_filters = [['created_by', FilterEqualFunction, get_user],['docrequests.request_type', FilterEqual, "engineering"]]
     base_permissions = ['can_list', 'can_show', 'can_edit'] 
 
     edit_title = 'Edit Code'
@@ -1144,7 +1144,7 @@ class DocumentView(CompactCRUDMixin, ModelView):
 
     
     #show_columns = ['id', 'code_type', 'bapco_code', 'oldcode', 'created_by', 'created', 'status']
-    list_columns = ['code_type', 'bapco_code', 'oldcode_p', 'created']
+    list_columns = ['code_type', 'bapco_code', 'oldcode_p', 'created','docrequests.request_type']
     edit_columns = ['oldcode', 'notes']
     
     search_columns = ['unit', 'materialclass', 'doctype', 'partner', 'cdrlitem', 'documentclass','code', 'oldcode', 'created_by', 'created_on']
@@ -1228,7 +1228,7 @@ class UserDocumentView(MasterDetailView):
 class ListRequest(ModelView):
     datamodel = SQLAInterface(DocRequests)
     base_order = ('id', 'desc')
-    base_filters = [['created_by', FilterEqualFunction, get_user]]
+    base_filters = [['created_by', FilterEqualFunction, get_user],['request_type', FilterEqual, "engineering"]]
     base_permissions = ['can_list', 'can_show'] 
 
     list_title = 'All Requests'
@@ -1613,7 +1613,7 @@ class SuperVendorDocumentView(CompactCRUDMixin, ModelView):
 class SuperListRequest(ModelView):
     datamodel = SQLAInterface(DocRequests)
     base_order = ('id', 'desc')
-    #base_filters = [['created_by', FilterEqualFunction, get_user]]
+    base_filters = [['request_type', FilterEqual, "engineering"]]
     base_permissions = ['can_list', 'can_show','can_delete'] 
 
 
@@ -1708,7 +1708,7 @@ appbuilder.add_view(CommentsView, "Comments",
 appbuilder.add_view(DocRequestsView, "Engineering Code Request",
                     icon="fa-paper-plane", category="Requests",
                     category_icon='fa-bold')
-
+'''
 appbuilder.add_view(VendorRequestsView, "Vendor Code Request",
                     icon="fa-paper-plane", category="Requests",
                     category_icon='fa-bold')
@@ -1719,7 +1719,7 @@ appbuilder.add_view(AskBapcoView, "N Request",
 
 
 appbuilder.add_separator(category='Requests')
-
+'''
 appbuilder.add_view(ListRequest, "All Requests",
                     icon="fa-codepen", category="Requests")
 
@@ -1731,12 +1731,13 @@ appbuilder.add_view(DocumentView, "All Your Codes",
 appbuilder.add_separator(category="Your Codes")
 appbuilder.add_view(EngDocumentView, "Engineering Codes",
                     icon="fas fa-copy element", category="Your Codes")
-
+'''
 appbuilder.add_view(VendorDocumentView, "Vendor Codes",
                     icon="fas fa-copy element", category="Your Codes")
 
 
 appbuilder.add_separator(category="Your Codes")
+'''
 appbuilder.add_view(PendingView, "Only Pending Codes",
                     icon="fa-folder-open", category="Your Codes",
                     category_icon='fa-bold')
@@ -1767,18 +1768,23 @@ appbuilder.add_view(DoctypeView, "DocType",
 appbuilder.add_view(PartnerView, "Partner",
                     icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
-appbuilder.add_view(CdrlitemView, "CDRL Item",
-                    icon="fa-list", category="Settings",
-                    category_icon='fa-cubes')
+
 appbuilder.add_view(DocumentclassView, "Document Class",
                     icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
+'''
+appbuilder.add_view(CdrlitemView, "CDRL Item",
+                    icon="fa-list", category="Settings",
+                    category_icon='fa-cubes')
+
 appbuilder.add_view(VendorView, "Vendor",
                     icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
+
 appbuilder.add_view(MrView, "MR",
                     icon="fa-list", category="Settings",
                     category_icon='fa-cubes')
+'''
 
 appbuilder.add_view(MatrixView, "Matrix View",
                     icon="fa-folder-open-o", category="Settings",
@@ -1799,13 +1805,14 @@ appbuilder.add_view(SuperDocumentView, "All Codes",
 appbuilder.add_view(SuperEngDocumentView, "All Engineering Codes",
                     icon="fas fa-copy element", category="Supervisor",
                     category_icon='fa-envelope')
+'''
 
 appbuilder.add_view(SuperVendorDocumentView, "All Vendor Codes",
                     icon="fas fa-copy element", category="Supervisor",
                     category_icon='fa-envelope')
 
 
-'''
+
 appbuilder.add_view(UserDocumentView, "Codes Generated by User",
                     icon="fa-folder-open-o", category="Supervisor")
 

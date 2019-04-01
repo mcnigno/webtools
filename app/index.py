@@ -1,7 +1,7 @@
 
 
 from flask_appbuilder import BaseView, expose
- 
+  
 
 class someView(BaseView):
     """
@@ -10,7 +10,7 @@ class someView(BaseView):
     route_base = ''
     default_view = 'index'
     index_template = 'appbuilder/index.html'
-
+  
     @expose('/')
     def index(self):
         from app import db

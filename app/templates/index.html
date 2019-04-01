@@ -2,44 +2,7 @@
 {% block content %}
 <script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js" integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl" crossorigin="anonymous"></script>
 
-<table class="table table-sm table-over">
-  <strong><i class="fas fa-braille element title"></i>Settings</strong>
-  <thead>
-    <tr> 
-      <th scope="col-md-1 col-sm-1"></th>
-      <th scope="col-md-1 col-sm-1"></th>
-      <th scope="col-md-8 col-sm-8"></th>
-      <th scope="col-md-2 col-sm-2"></th>
-    </tr>
-  </thead>
-  <tbody style="text-align: left">
-    <tr>
-      <th scope="row">1</th>
-      <td><i class="fas fa-handshake element"></i>Partner</td>
-      <td></td>
-      <td class="total">{{partner}}</td>
-    </tr>
-    <tr>
-      <th scope="row">2</th>
-      <td><i class="fas fa-th-large element"></i>Plant Unit</td>
-      <td></td>
-      <td class="total">{{unit}}</td>
-    </tr>
-    <tr>
-      <th scope="row">3</th>
-      <td><i class="fas fa-puzzle-piece element"></i>Material Class</td>
-      <td></td>
-      <td class="total">{{material}}</td>
-    </tr>
-    <tr>
-      <th scope="row">4</th>
-      <td><i class="fas fa-copy element"></i>Document Type</td>
-      <td></td>
-      <td class="total">{{doctype}}</td>
-    </tr>
-    
-  </tbody>
-</table>
+
 
 
 <div class="jumbotron row">
@@ -50,7 +13,7 @@
             
             <h3><span style="color:#4b1f68">ASK BAPCO </span>PROJECT</h3>
               
-            <p>Document Naming Engine</small></p>
+            <h4 style="text-align: center;">Document Naming Engine</small></h4>
             
             <div align="justify">
               <br>
@@ -76,16 +39,55 @@
     
     <div class="col-md-6" style="text-align:left; padding-left: 100px";>
         <hr><small>
+            <table class="table table-sm table-over">
+                <strong><i class="fas fa-braille element title"></i>Settings</strong>
+                <thead>
+                  <tr> 
+                    <th scope="col-md-1 col-sm-1"></th>
+                    <th scope="col-md-1 col-sm-1"></th>
+                    <th scope="col-md-8 col-sm-8"></th>
+                    <th scope="col-md-2 col-sm-2"></th>
+                  </tr>
+                </thead>
+                <tbody style="text-align: left">
+                  <tr>
+                    <th scope="row">1</th>
+                    <td><i class="fas fa-handshake element"></i>Partner</td>
+                    <td></td>
+                    <td class="total">{{partner}}</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">2</th>
+                    <td><i class="fas fa-th-large element"></i>Plant Unit</td>
+                    <td></td>
+                    <td class="total">{{unit}}</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">3</th>
+                    <td><i class="fas fa-puzzle-piece element"></i>Material Class</td>
+                    <td></td>
+                    <td class="total">{{material}}</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">4</th>
+                    <td><i class="fas fa-copy element"></i>Document Type</td>
+                    <td></td>
+                    <td class="total">{{doctype}}</td>
+                  </tr>
+                  
+                </tbody>
+              </table>
             <br>
             <br>
             
-            <p><a href="/docrequestsview/add"><i id="eng_ico" class="fas fa-copy element"></i>&nbsp ENGINEERING</a></p>
+            <p><a href="/docrequestsview/add"><i id="eng_ico" class="fas fa-copy element"></i>&nbsp New ENGINEERING Request</a></p>
+            <!--
             <br>
             <br>
             <p><a href="/vendorrequestsview/add"><i id="ven_ico" class="fas fa-copy element"></i>&nbsp VENDOR</a></p>
             
           
-            <!--<h3><a href="/docrequestsview/list/"><img border="0" src="/static/img/logo_technipfmc_w.png" alt="W3Schools" class="center" width="70%" height="70%"></a></h3>
+            <h3><a href="/docrequestsview/list/"><img border="0" src="/static/img/logo_technipfmc_w.png" alt="W3Schools" class="center" width="70%" height="70%"></a></h3>
             -->
             <!--<p>{{_("In this area you can also list, add, edit, delete and export bapco's codes. Functionalities and permissions are based on you role.  ")}}</p>-->
             <!--<a class="btn btn-primary" href="#" role="button">Vendor Code</a>-->
